@@ -53,14 +53,13 @@ html, body {
 .page-stack {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 20px;
   max-width: 520px;
   width: 100%;
 }
 
 .logo-top {
-  max-width: 340px;
   width: 100%;
   height: auto;
 }
