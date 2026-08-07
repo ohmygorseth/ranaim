@@ -42,16 +42,14 @@ ranaim/
 7. Gå til **Firestore Database → Regler (Rules)**, og lim inn innholdet
    fra `firestore.rules` i dette prosjektet → **Publiser**
 
-## Steg 2: Legg til logo og lyd (valgfritt, men anbefalt)
+## Steg 2: Logo og lyd
 
-- Legg Ranheim-logoen (PNG med transparent bakgrunn) i
-  `assets/ril-logo.png`
-- Legg to korte lydeffekter (mp3) i `assets/sounds/hit.mp3` og
-  `assets/sounds/miss.mp3` — finnes gratis f.eks. på
-  [freesound.org](https://freesound.org) eller [mixkit.co](https://mixkit.co/free-sound-effects/game/)
-
-Appen fungerer også uten disse (logoen skjules automatisk, lyd feiler
-stille), men det gir en mer polert følelse å ha dem på plass.
+- Ranheim-logoen ligger allerede i `assets/ril-logo.png`
+- Enkle genererte lydeffekter ligger i `assets/sounds/hit.wav` og
+  `assets/sounds/miss.wav` - disse fungerer fint, men er syntetiske
+  toner. Ønsker dere mer "spillaktige" lydeffekter senere, kan disse
+  filene byttes ut med egne mp3/wav-filer (behold samme filnavn, eller
+  oppdater stiene i `index.html`).
 
 ## Steg 3: Last opp til GitHub
 
