@@ -51,8 +51,10 @@ html, body {
 }
 
 .logo {
-  max-width: 160px;
-  margin-bottom: 16px;
+  max-width: 340px;
+  width: 100%;
+  height: auto;
+  margin-bottom: 20px;
 }
 
 h1 {
