@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranheim Esport - Aim Trainer</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Lydeffekter -->
+  <audio id="sound-hit" src="assets/sounds/hit.mp3" preload="auto"></audio>
+  <audio id="sound-miss" src="assets/sounds/miss.mp3" preload="auto"></audio>
+
+  <div id="app">
+
+    <!-- SKJERM: Velg gruppe -->
+    <section id="screen-group-select" class="screen">
+      <div class="panel-center">
+        <img src="assets/ril-logo.png" alt="Ranheim IL" class="logo" onerror="this.style.display='none'" />
+        <h1>Ranheim Esport - Aim Trainer</h1>
+        <p class="subtitle">Velg din gruppe</p>
+        <div id="group-list" class="group-list"></div>
+      </div>
+    </section>
+
+    <!-- SKJERM: Passord -->
+    <section id="screen-password" class="screen hidden">
+      <div class="panel-center">
+        <h2 id="password-group-name"></h2>
+        <form id="password-form">
+          <input type="password" id="password-input" placeholder="Gruppepassord" autocomplete="off" required />
+          <p id="password-error" class="error-text hidden">Feil passord, prøv igjen.</p>
+          <button type="submit" class="btn-primary">Fortsett</button>
+        </form>
+        <button id="back-to-groups" class="btn-link">&larr; Bytt gruppe</button>
+      </div>
+    </section>
+
+    <!-- SKJERM: Nickname -->
+    <section id="screen-nickname" class="screen hidden">
+      <div class="panel-center">
+        <h2>Skriv inn kallenavn</h2>
+        <p class="hint-text">Ikke bruk ditt ekte navn. Upassende navn slettes av trenerne.</p>
+        <form id="nickname-form">
+          <input type="text" id="nickname-input" maxlength="20" placeholder="Kallenavn" autocomplete="off" required />
+          <button type="submit" class="btn-primary">Gå videre</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- SKJERM: Hub (modusvalg) -->
+    <section id="screen-hub" class="screen hidden">
+      <div class="hub-layout">
+        <div class="hub-main">
+          <header class="hub-header">
+            <div>
+              <h1>Ranheim Esport - Aim Trainer</h1>
+              <p class="hub-meta">
+                Gruppe: <strong id="hub-group-name"></strong> &nbsp;|&nbsp;
+                Spiller: <strong id="hub-nickname"></strong>
+              </p>
+            </div>
+            <button id="change-group-btn" class="btn-link">Bytt gruppe</button>
+          </header>
+
+          <h2 class="section-title">Velg modus</h2>
+          <div id="mode-list" class="mode-list"></div>
+        </div>
+
+        <aside class="sidebar">
+          <h3>Highscore</h3>
+          <div id="sidebar-lb-tabs" class="lb-tabs">
+            <button class="lb-tab active" data-tab="weekly">Ukentlig</button>
+            <button class="lb-tab" data-tab="group">Gruppe</button>
+            <button class="lb-tab" data-tab="global">Global</button>
+          </div>
+          <div id="sidebar-lb-list" class="lb-list lb-list-scroll"></div>
+          <button id="open-full-leaderboard-btn" class="btn-link">Se full liste (topp 200)</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SKJERM: Spill -->
+    <section id="screen-game" class="screen hidden">
+      <div class="game-container">
+        <div id="countdown-overlay" class="countdown-overlay">3</div>
+        <canvas id="game-canvas" width="1200" height="700" class="hidden"></canvas>
+      </div>
+    </section>
+
+    <!-- SKJERM: Resultat -->
+    <section id="screen-result" class="screen hidden">
+      <div class="panel-center">
+        <h2>Runde ferdig!</h2>
+        <div class="result-stats">
+          <div class="stat-block">
+            <span class="stat-value" id="result-score">0</span>
+            <span class="stat-label">Poeng</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value" id="result-hits">0</span>
+            <span class="stat-label">Treff</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value" id="result-shots">0</span>
+            <span class="stat-label">Skudd</span>
+          </div>
+        </div>
+        <p id="result-context" class="result-context"></p>
+        <div class="result-actions">
+          <button id="play-again-btn" class="btn-primary">Spill igjen</button>
+          <button id="back-to-hub-btn" class="btn-link">Tilbake til meny</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKJERM: Full highscore-liste -->
+    <section id="screen-full-leaderboard" class="screen hidden">
+      <div class="panel-center panel-wide">
+        <h2>Highscore</h2>
+        <div id="full-lb-tabs" class="lb-tabs">
+          <button class="lb-tab active" data-tab="weekly">Ukentlig</button>
+          <button class="lb-tab" data-tab="group">Gruppe</button>
+          <button class="lb-tab" data-tab="global">Global</button>
+        </div>
+        <div id="full-lb-list" class="lb-list lb-list-scroll lb-list-tall"></div>
+        <button id="close-full-leaderboard-btn" class="btn-link">&larr; Tilbake</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
