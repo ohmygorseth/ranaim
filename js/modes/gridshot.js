@@ -11,6 +11,9 @@ const GRID_COLS = 6;
 const GRID_ROWS = 4;
 const TARGET_RADIUS = 28;
 
+const CROSSHAIR_SIZE = 14;
+const CROSSHAIR_GAP = 4;
+
 let ctx = null;
 let canvas = null;
 let onCompleteCallback = null;
@@ -23,6 +26,10 @@ let timerInterval = null;
 let running = false;
 
 let clickHandler = null;
+let moveHandler = null;
+let animationFrameId = null;
+let mouseX = 0;
+let mouseY = 0;
 
 export const gridshot = {
   id: "gridshot",
@@ -39,11 +46,16 @@ export const gridshot = {
     timeLeft = ROUND_SECONDS;
     running = true;
 
+    mouseX = canvas.width / 2;
+    mouseY = canvas.height / 2;
+
     spawnTarget();
-    draw();
 
     clickHandler = (e) => handleClick(e);
     canvas.addEventListener("mousedown", clickHandler);
+
+    moveHandler = (e) => updateMousePosition(e);
+    canvas.addEventListener("mousemove", moveHandler);
 
     timerInterval = setInterval(() => {
       timeLeft -= 1;
@@ -51,6 +63,8 @@ export const gridshot = {
         endRound();
       }
     }, 1000);
+
+    animationLoop();
   },
 
   stop() {
@@ -58,12 +72,30 @@ export const gridshot = {
   }
 };
 
+function animationLoop() {
+  if (!running) return;
+  draw();
+  animationFrameId = requestAnimationFrame(animationLoop);
+}
+
+function updateMousePosition(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  mouseX = (e.clientX - rect.left) * scaleX;
+  mouseY = (e.clientY - rect.top) * scaleY;
+}
+
 function cleanup() {
   running = false;
   if (timerInterval) clearInterval(timerInterval);
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
   if (clickHandler && canvas) canvas.removeEventListener("mousedown", clickHandler);
+  if (moveHandler && canvas) canvas.removeEventListener("mousemove", moveHandler);
   timerInterval = null;
+  animationFrameId = null;
   clickHandler = null;
+  moveHandler = null;
 }
 
 function endRound() {
@@ -95,14 +127,12 @@ function spawnTarget() {
 
 function handleClick(e) {
   if (!running) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  updateMousePosition(e);
 
   shots += 1;
 
-  const dx = x - target.x;
-  const dy = y - target.y;
+  const dx = mouseX - target.x;
+  const dy = mouseY - target.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
   if (dist <= TARGET_RADIUS) {
@@ -112,8 +142,6 @@ function handleClick(e) {
   } else {
     playSound("miss");
   }
-
-  draw();
 }
 
 function draw() {
@@ -142,6 +170,43 @@ function draw() {
   ctx.fillText(`Tid: ${timeLeft}s`, 20, 36);
   ctx.fillText(`Treff: ${hits}`, 20, 66);
   ctx.fillText(`Skudd: ${shots}`, 20, 96);
+
+  drawCrosshair();
+}
+
+function drawCrosshair() {
+  const x = mouseX;
+  const y = mouseY;
+  const size = CROSSHAIR_SIZE;
+  const gap = CROSSHAIR_GAP;
+
+  ctx.save();
+  ctx.strokeStyle = "#3ecf6e";
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  // Venstre strek
+  ctx.moveTo(x - gap - size, y);
+  ctx.lineTo(x - gap, y);
+  // Høyre strek
+  ctx.moveTo(x + gap, y);
+  ctx.lineTo(x + gap + size, y);
+  // Øvre strek
+  ctx.moveTo(x, y - gap - size);
+  ctx.lineTo(x, y - gap);
+  // Nedre strek
+  ctx.moveTo(x, y + gap);
+  ctx.lineTo(x, y + gap + size);
+  ctx.stroke();
+
+  // Liten senter-prikk
+  ctx.beginPath();
+  ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+  ctx.fillStyle = "#3ecf6e";
+  ctx.fill();
+
+  ctx.restore();
 }
 
 function playSound(type) {
