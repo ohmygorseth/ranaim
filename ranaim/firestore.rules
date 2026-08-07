@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// ============================================================
+// GRUNNLEGGENDE SCOREVALIDERING
+// ============================================================
+// Nivå: "grunnleggende validering" - stopper useriøs/åpenbar
+// juks (urealistiske tall), men er ikke vanntett mot en
+// teknisk kyndig person som virkelig prøver å jukse.
+//
+// Maks mulig score i Gridshot: teoretisk urealistisk høyt hvis
+// noen klikker fort - vi setter en generøs, men begrensende,
+// øvre grense. Juster MAX_SCORE / MAX_HITS ved behov.
+// ============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidScoreEntry() {
+      let d = request.resource.data;
+      return d.nickname is string
+        && d.nickname.size() > 0
+        && d.nickname.size() <= 20
+        && d.score is number
+        && d.hits is number
+        && d.shots is number
+        && d.hits >= 0
+        && d.shots >= 0
+        && d.hits <= d.shots
+        && d.shots <= 300      // umulig å avfyre mer enn ~5 klikk/sek i 60 sek
+        && d.score >= 0
+        && d.score <= 30000;   // generøs øvre grense for gridshot-scoreformelen
+    }
+
+    match /groups/{groupId}/weekly/{weekId}/entries/{entryId} {
+      allow read: if true;
+      allow write: if isValidScoreEntry();
+    }
+
+    match /groups/{groupId}/alltime/entries/{entryId} {
+      allow read: if true;
+      allow write: if isValidScoreEntry();
+    }
+
+    match /global/alltime/entries/{entryId} {
+      allow read: if true;
+      allow write: if isValidScoreEntry();
+    }
+  }
+}
