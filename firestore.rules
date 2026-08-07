@@ -36,12 +36,12 @@ service cloud.firestore {
       allow write: if isValidScoreEntry();
     }
 
-    match /groups/{groupId}/alltime/entries/{entryId} {
+    match /groups/{groupId}/alltime/{entryId} {
       allow read: if true;
       allow write: if isValidScoreEntry();
     }
 
-    match /global/alltime/entries/{entryId} {
+    match /globalAllTime/{entryId} {
       allow read: if true;
       allow write: if isValidScoreEntry();
     }

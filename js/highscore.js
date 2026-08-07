@@ -6,10 +6,10 @@
 //   groups/{groupId}/weekly/{weekId}/entries/{nickname}
 //     -> ukens highscore for én gruppe, ett dokument per spiller
 //
-//   groups/{groupId}/alltime/entries/{nickname}
+//   groups/{groupId}/alltime/{nickname}
 //     -> evig highscore for én gruppe, ett dokument per spiller
 //
-//   global/alltime/entries/{nickname__groupId}
+//   globalAllTime/{nickname}__{groupId}
 //     -> evig highscore på tvers av alle grupper
 //
 // Hver liste beholder kun spillerens BESTE score (overskrives
@@ -56,8 +56,8 @@ export async function submitScore({ nickname, groupId, groupName, score, hits, s
   };
 
   const weeklyRef = doc(db, "groups", groupId, "weekly", weekId, "entries", nickname);
-  const allTimeRef = doc(db, "groups", groupId, "alltime", "entries", nickname);
-  const globalRef = doc(db, "global", "alltime", "entries", `${nickname}__${groupId}`);
+  const allTimeRef = doc(db, "groups", groupId, "alltime", nickname);
+  const globalRef = doc(db, "globalAllTime", `${nickname}__${groupId}`);
 
   const weeklyImproved = await writeIfBetter(weeklyRef, payload);
   const allTimeImproved = await writeIfBetter(allTimeRef, payload);
@@ -88,7 +88,7 @@ export async function getWeeklyLeaderboard(groupId, max = 200) {
  * Henter topp N fra gruppens evige liste.
  */
 export async function getGroupAllTimeLeaderboard(groupId, max = 200) {
-  const ref = collection(db, "groups", groupId, "alltime", "entries");
+  const ref = collection(db, "groups", groupId, "alltime");
   return fetchLeaderboard(ref, max);
 }
 
@@ -96,7 +96,7 @@ export async function getGroupAllTimeLeaderboard(groupId, max = 200) {
  * Henter topp N fra den globale evige listen (alle grupper).
  */
 export async function getGlobalAllTimeLeaderboard(max = 200) {
-  const ref = collection(db, "global", "alltime", "entries");
+  const ref = collection(db, "globalAllTime");
   return fetchLeaderboard(ref, max);
 }
 

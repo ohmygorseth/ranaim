@@ -7,10 +7,10 @@
 // ============================================================
 
 export const firebaseConfig = {
-  apiKey: "DIN_API_KEY",
-  authDomain: "DITT_PROSJEKT.firebaseapp.com",
-  projectId: "DITT_PROSJEKT",
-  storageBucket: "DITT_PROSJEKT.appspot.com",
-  messagingSenderId: "DITT_SENDER_ID",
-  appId: "DIN_APP_ID"
+  apiKey: "AIzaSyBKKSOht1OD0FIj3kN-0E1XfPJdYIT_4MM",
+  authDomain: "ranaim-8c7eb.firebaseapp.com",
+  projectId: "ranaim-8c7eb",
+  storageBucket: "ranaim-8c7eb.firebasestorage.app",
+  messagingSenderId: "913218835978",
+  appId: "1:913218835978:web:157ce3ba4aa0ae2762b1f3"
 };
