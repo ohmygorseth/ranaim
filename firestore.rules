@@ -26,7 +26,7 @@ service cloud.firestore {
         && d.hits >= 0
         && d.shots >= 0
         && d.hits <= d.shots
-        && d.shots <= 300      // umulig å avfyre mer enn ~5 klikk/sek i 60 sek
+        && d.shots <= 150      // umulig å avfyre mer enn ~5 klikk/sek i 30 sek
         && d.score >= 0
         && d.score <= 30000;   // generøs øvre grense for gridshot-scoreformelen
     }

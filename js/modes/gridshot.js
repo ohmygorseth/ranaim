@@ -6,7 +6,7 @@
 // samme mønster: egen fil i js/modes/, samme grensesnitt.
 // ============================================================
 
-const ROUND_SECONDS = 60;
+const ROUND_SECONDS = 30;
 const GRID_COLS = 6;
 const GRID_ROWS = 4;
 const TARGET_RADIUS = 28;
