@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranheim Esport - Aim Trainer</title>
+  <title>RanAim - Ranheim Esport</title>
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <link rel="apple-touch-icon" href="assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,600;0,700;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -44,11 +49,13 @@
     <section id="screen-nickname" class="screen hidden">
       <div class="panel-center">
         <h2>Skriv inn kallenavn</h2>
+        <p class="nickname-group" id="nickname-group-name"></p>
         <p class="hint-text">Ikke bruk ditt ekte navn. Upassende navn slettes av trenerne.</p>
         <form id="nickname-form">
           <input type="text" id="nickname-input" maxlength="20" placeholder="Kallenavn" autocomplete="off" required />
           <button type="submit" class="btn-primary">Gå videre</button>
         </form>
+        <button id="nickname-back-btn" class="btn-link">&larr; Bytt gruppe</button>
       </div>
     </section>
 
@@ -57,8 +64,8 @@
       <div class="hub-layout">
         <div class="hub-main">
           <header class="hub-header">
-            <div>
-              <h1>Ranheim Esport - Aim Trainer</h1>
+            <div class="hub-header-left">
+              <img src="assets/ril-logo.png" alt="Ranheim Esport" class="hub-logo" onerror="this.style.display='none'" />
               <p class="hub-meta">
                 Gruppe: <strong id="hub-group-name"></strong> &nbsp;|&nbsp;
                 Spiller: <strong id="hub-nickname"></strong>
@@ -73,13 +80,13 @@
 
         <aside class="sidebar">
           <h3>Highscore</h3>
+          <select id="sidebar-lb-mode-select" class="mode-select"></select>
           <div id="sidebar-lb-tabs" class="lb-tabs">
-            <button class="lb-tab active" data-tab="weekly">Ukentlig</button>
-            <button class="lb-tab" data-tab="group">Gruppe</button>
-            <button class="lb-tab" data-tab="global">Global</button>
+            <button class="lb-tab active" data-tab="weekly">Treningens<br>beste</button>
+            <button class="lb-tab" data-tab="group">Din gruppe<br>all time</button>
+            <button class="lb-tab" data-tab="global">Alle grupper<br>all time</button>
           </div>
           <div id="sidebar-lb-list" class="lb-list lb-list-scroll"></div>
-          <button id="open-full-leaderboard-btn" class="btn-link">Se full liste (topp 200)</button>
         </aside>
       </div>
     </section>
@@ -87,48 +94,33 @@
     <!-- SKJERM: Spill -->
     <section id="screen-game" class="screen hidden">
       <div class="game-container">
-        <div id="countdown-overlay" class="countdown-overlay">3</div>
+        <div id="countdown-overlay" class="countdown-overlay">
+          <img src="assets/ril-logo.png" alt="" class="countdown-logo" onerror="this.style.display='none'" />
+          <span id="countdown-number">3</span>
+        </div>
         <canvas id="game-canvas" width="1200" height="700" class="hidden"></canvas>
+        <img src="assets/favicon.png" alt="" class="game-watermark" onerror="this.style.display='none'" />
       </div>
     </section>
 
     <!-- SKJERM: Resultat -->
     <section id="screen-result" class="screen hidden">
       <div class="panel-center">
-        <h2>Runde ferdig!</h2>
+        <div id="result-banner" class="result-banner hidden"></div>
+        <h2>Runde ferdig</h2>
         <div class="result-stats">
           <div class="stat-block">
             <span class="stat-value" id="result-score">0</span>
             <span class="stat-label">Poeng</span>
           </div>
-          <div class="stat-block">
-            <span class="stat-value" id="result-hits">0</span>
-            <span class="stat-label">Treff</span>
-          </div>
-          <div class="stat-block">
-            <span class="stat-value" id="result-shots">0</span>
-            <span class="stat-label">Skudd</span>
-          </div>
+          <div id="result-extra-stats" class="result-stats"></div>
         </div>
+        <p id="result-personal-best" class="result-pb"></p>
         <p id="result-context" class="result-context"></p>
         <div class="result-actions">
           <button id="play-again-btn" class="btn-primary">Spill igjen</button>
           <button id="back-to-hub-btn" class="btn-link">Tilbake til meny</button>
         </div>
-      </div>
-    </section>
-
-    <!-- SKJERM: Full highscore-liste -->
-    <section id="screen-full-leaderboard" class="screen hidden">
-      <div class="panel-center panel-wide">
-        <h2>Highscore</h2>
-        <div id="full-lb-tabs" class="lb-tabs">
-          <button class="lb-tab active" data-tab="weekly">Ukentlig</button>
-          <button class="lb-tab" data-tab="group">Gruppe</button>
-          <button class="lb-tab" data-tab="global">Global</button>
-        </div>
-        <div id="full-lb-list" class="lb-list lb-list-scroll lb-list-tall"></div>
-        <button id="close-full-leaderboard-btn" class="btn-link">&larr; Tilbake</button>
       </div>
     </section>
 

@@ -1,14 +1,22 @@
 // ============================================================
-// GRIDSHOT-MODUS
+// REFLEX-MODUS
 // ============================================================
-// Følger modul-grensesnittet: start(canvas, ctx, onComplete) / stop()
-// Alle moduser som legges til senere (f.eks. Tracking) bør følge
-// samme mønster: egen fil i js/modes/, samme grensesnitt.
+// Følger samme modul-grensesnitt som de andre: start(canvas, ctx, onComplete) / stop()
+//
+// Ett mål av gangen, fast 6x4 grid-posisjon (som Gridshot), men
+// målet forsvinner automatisk etter TARGET_LIFETIME_MS hvis det
+// ikke treffes - tester reaksjonsevne, ikke bare presisjon.
+//
+// Poeng = treff × presisjon × 100 (samme formel som Gridshot).
+// "Skudd" i presisjonsberegningen inkluderer både faktiske klikk
+// OG mål som rakk å utløpe uten å bli truffet, siden begge deler
+// representerer et "tapt" mål.
 // ============================================================
 
 import { drawCrosshair } from "../crosshair.js";
 
 const ROUND_SECONDS = 30;
+const TARGET_LIFETIME_MS = 1400;
 const GRID_COLS = 6;
 const GRID_ROWS = 4;
 const TARGET_RADIUS = 50;
@@ -18,21 +26,25 @@ let canvas = null;
 let onCompleteCallback = null;
 
 let hits = 0;
-let shots = 0;
+let totalClicks = 0;
+let expiredCount = 0;
 let timeLeft = ROUND_SECONDS;
+
 let target = null; // {x, y}
+let targetSpawnTime = 0;
+
 let timerInterval = null;
+let animationFrameId = null;
 let running = false;
 
 let clickHandler = null;
 let moveHandler = null;
-let animationFrameId = null;
 let mouseX = 0;
 let mouseY = 0;
 
-export const gridshot = {
-  id: "gridshot",
-  displayName: "Gridshot",
+export const reflex = {
+  id: "reflex",
+  displayName: "Reflex",
   comingSoon: false,
 
   start(canvasEl, context, onComplete) {
@@ -41,7 +53,8 @@ export const gridshot = {
     onCompleteCallback = onComplete;
 
     hits = 0;
-    shots = 0;
+    totalClicks = 0;
+    expiredCount = 0;
     timeLeft = ROUND_SECONDS;
     running = true;
 
@@ -63,27 +76,13 @@ export const gridshot = {
       }
     }, 1000);
 
-    animationLoop();
+    animationFrameId = requestAnimationFrame(loop);
   },
 
   stop() {
     cleanup();
   }
 };
-
-function animationLoop() {
-  if (!running) return;
-  draw();
-  animationFrameId = requestAnimationFrame(animationLoop);
-}
-
-function updateMousePosition(e) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  mouseX = (e.clientX - rect.left) * scaleX;
-  mouseY = (e.clientY - rect.top) * scaleY;
-}
 
 function cleanup() {
   running = false;
@@ -99,22 +98,37 @@ function cleanup() {
 
 function endRound() {
   cleanup();
+  const shots = totalClicks + expiredCount;
   const finalScore = calculateScore(hits, shots);
+
   if (onCompleteCallback) {
     onCompleteCallback({
       score: finalScore,
       stats: [
         { label: "Treff", value: hits },
-        { label: "Skudd", value: shots }
+        { label: "Bom", value: Math.max(0, totalClicks - hits) },
+        { label: "Utløpt", value: expiredCount }
       ]
     });
   }
 }
 
-export function calculateScore(hitCount, shotCount) {
+function calculateScore(hitCount, shotCount) {
   if (shotCount === 0) return 0;
   const accuracy = hitCount / shotCount;
-  return Math.round(hitCount * accuracy * 100); // *100 for et "finere" poengtall
+  return Math.round(hitCount * accuracy * 100);
+}
+
+function loop(now) {
+  if (!running) return;
+
+  if (now - targetSpawnTime >= TARGET_LIFETIME_MS) {
+    expiredCount += 1;
+    spawnTarget();
+  }
+
+  draw(now);
+  animationFrameId = requestAnimationFrame(loop);
 }
 
 function spawnTarget() {
@@ -128,13 +142,22 @@ function spawnTarget() {
     x: col * cellW + cellW / 2,
     y: row * cellH + cellH / 2
   };
+  targetSpawnTime = performance.now();
+}
+
+function updateMousePosition(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  mouseX = (e.clientX - rect.left) * scaleX;
+  mouseY = (e.clientY - rect.top) * scaleY;
 }
 
 function handleClick(e) {
   if (!running) return;
   updateMousePosition(e);
 
-  shots += 1;
+  totalClicks += 1;
 
   const dx = mouseX - target.x;
   const dy = mouseY - target.y;
@@ -149,7 +172,7 @@ function handleClick(e) {
   }
 }
 
-function draw() {
+function draw(now) {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -157,8 +180,10 @@ function draw() {
   ctx.fillStyle = "#0d1b33";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Mål
+  // Mål med krympende ring som viser gjenværende tid
   if (target) {
+    const lifeRatio = Math.max(0, 1 - (now - targetSpawnTime) / TARGET_LIFETIME_MS);
+
     ctx.beginPath();
     ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
@@ -166,9 +191,16 @@ function draw() {
     ctx.lineWidth = 4;
     ctx.strokeStyle = "#1b3a70";
     ctx.stroke();
+
+    // Krympende tidsring rundt målet
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, TARGET_RADIUS + 8, -Math.PI / 2, -Math.PI / 2 + lifeRatio * Math.PI * 2);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = lifeRatio > 0.3 ? "#3ecf6e" : "#e6493f";
+    ctx.stroke();
   }
 
-  // HUD: tid / treff / skudd
+  // HUD
   ctx.fillStyle = "#ffffff";
   ctx.font = `bold ${Math.round(canvas.height * 0.042)}px 'Saira Condensed', sans-serif`;
   ctx.textAlign = "left";
@@ -176,7 +208,7 @@ function draw() {
   const hudLine = canvas.height * 0.05;
   ctx.fillText(`Tid: ${timeLeft}s`, hudX, hudLine);
   ctx.fillText(`Treff: ${hits}`, hudX, hudLine * 1.9);
-  ctx.fillText(`Skudd: ${shots}`, hudX, hudLine * 2.8);
+  ctx.fillText(`Utløpt: ${expiredCount}`, hudX, hudLine * 2.8);
 
   drawCrosshair(ctx, mouseX, mouseY);
 }

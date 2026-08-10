@@ -5,8 +5,13 @@
 // nickname, hub, spill, resultat) og highscore-sidepanelet.
 // ============================================================
 
-import { GROUPS, getGroupById } from "./groups.js";
-import { gridshot, calculateScore } from "./modes/gridshot.js";
+import { GROUPS } from "./groups.js";
+import { gridshot } from "./modes/gridshot.js";
+import { tracking } from "./modes/tracking.js";
+import { keyboardMode } from "./modes/keyboard.js";
+import { wasdMode } from "./modes/wasd.js";
+import { keyboardMouseMode } from "./modes/keyboardmouse.js";
+import { reflex } from "./modes/reflex.js";
 import {
   submitScore,
   getWeeklyLeaderboard,
@@ -19,11 +24,9 @@ import {
 // Moduler tilgjengelig i hub-en. Legg til nye her når de er klare
 // (sett comingSoon: false når modulen er ferdig implementert).
 // ------------------------------------------------------------
-const MODES = [
-  gridshot,
-  { id: "tracking", displayName: "Tracking", comingSoon: true },
-  { id: "reflex", displayName: "Reflex", comingSoon: true }
-];
+const MODES = [gridshot, tracking, reflex, keyboardMode, keyboardMouseMode, wasdMode];
+
+const PLAYABLE_MODES = MODES.filter((m) => !m.comingSoon);
 
 // ------------------------------------------------------------
 // State
@@ -32,20 +35,22 @@ let state = {
   group: null,
   nickname: null,
   activeMode: null,
-  activeTab: "weekly" // weekly | group | global
+  activeTab: "weekly", // weekly | group | global
+  leaderboardModeId: PLAYABLE_MODES[0].id // hvilken modus sitt highscore som vises
 };
 
 // ------------------------------------------------------------
 // DOM-referanser
 // ------------------------------------------------------------
+const sidebarModeSelect = document.getElementById("sidebar-lb-mode-select");
+
 const screens = {
   groupSelect: document.getElementById("screen-group-select"),
   password: document.getElementById("screen-password"),
   nickname: document.getElementById("screen-nickname"),
   hub: document.getElementById("screen-hub"),
   game: document.getElementById("screen-game"),
-  result: document.getElementById("screen-result"),
-  fullLeaderboard: document.getElementById("screen-full-leaderboard")
+  result: document.getElementById("screen-result")
 };
 
 function showScreen(name) {
@@ -65,6 +70,12 @@ function renderGroupSelect() {
     btn.textContent = group.name;
     btn.addEventListener("click", () => {
       state.group = group;
+
+      if (!REQUIRE_GROUP_PASSWORD) {
+        goToNicknameScreen();
+        return;
+      }
+
       showScreen("password");
       document.getElementById("password-error").classList.add("hidden");
       document.getElementById("password-input").value = "";
@@ -75,13 +86,23 @@ function renderGroupSelect() {
   });
 }
 
+function goToNicknameScreen() {
+  showScreen("nickname");
+  document.getElementById("nickname-group-name").textContent = state.group.name;
+  document.getElementById("nickname-input").value = "";
+  document.getElementById("nickname-input").focus();
+}
+
+document.getElementById("nickname-back-btn").addEventListener("click", () => {
+  state.group = null;
+  showScreen("groupSelect");
+});
+
 document.getElementById("password-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = document.getElementById("password-input").value;
   if (input === state.group.password) {
-    showScreen("nickname");
-    document.getElementById("nickname-input").value = "";
-    document.getElementById("nickname-input").focus();
+    goToNicknameScreen();
   } else {
     document.getElementById("password-error").classList.remove("hidden");
   }
@@ -105,6 +126,21 @@ document.getElementById("nickname-form").addEventListener("submit", (e) => {
 // ------------------------------------------------------------
 // 3. Hub (modusvalg)
 // ------------------------------------------------------------
+// ------------------------------------------------------------
+// Sett til true for å kreve gruppepassord igjen.
+// Passordene ligger fortsatt i js/groups.js og brukes automatisk.
+// ------------------------------------------------------------
+const REQUIRE_GROUP_PASSWORD = false;
+
+const MODE_ICONS = {
+  gridshot: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>`,
+  tracking: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 16c4-9 8-9 12 0s6 4 8-2" stroke-linecap="round"/><circle cx="17" cy="9" r="3"/></svg>`,
+  reflex: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z" stroke-linejoin="round"/></svg>`,
+  keyboard: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6" stroke-linecap="round"/></svg>`,
+  keyboardmouse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="13" height="11" rx="2"/><path d="M5 11h.01M8 11h.01M11 11h.01M5 14.5h5" stroke-linecap="round"/><rect x="17.5" y="5" width="5" height="9" rx="2.5"/><path d="M20 5v3" stroke-linecap="round"/></svg>`,
+  wasd: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="9" y="10" width="6" height="6" rx="1"/><rect x="16" y="10" width="6" height="6" rx="1"/></svg>`
+};
+
 function renderHub() {
   document.getElementById("hub-group-name").textContent = state.group.name;
   document.getElementById("hub-nickname").textContent = state.nickname;
@@ -115,8 +151,9 @@ function renderHub() {
     const card = document.createElement("button");
     card.className = "mode-card" + (mode.comingSoon ? " mode-card-disabled" : "");
     card.innerHTML = `
+      <div class="mode-card-icon">${MODE_ICONS[mode.id] || ""}</div>
       <div class="mode-card-title">${mode.displayName}</div>
-      <div class="mode-card-sub">${mode.comingSoon ? "Kommer snart" : "Klar til å spille"}</div>
+      <div class="mode-card-sub">${mode.comingSoon ? "Kommer snart" : MODE_DESCRIPTIONS[mode.id] || ""}</div>
     `;
     if (!mode.comingSoon) {
       card.addEventListener("click", () => startCountdown(mode));
@@ -124,6 +161,15 @@ function renderHub() {
     container.appendChild(card);
   });
 }
+
+const MODE_DESCRIPTIONS = {
+  gridshot: "Treff flest mulig mål",
+  tracking: "Følg målet med siktet",
+  reflex: "Rask reaksjon under tidspress",
+  keyboard: "Finn riktig tast raskt",
+  keyboardmouse: "Veksle mellom tast og museknapp",
+  wasd: "Lær riktig håndgrep"
+};
 
 function enterHub() {
   showScreen("hub");
@@ -149,11 +195,12 @@ function startCountdown(mode) {
   overlay.classList.remove("hidden");
 
   let count = 3;
-  overlay.textContent = count;
+  const numberEl = document.getElementById("countdown-number");
+  numberEl.textContent = count;
   const interval = setInterval(() => {
     count -= 1;
     if (count > 0) {
-      overlay.textContent = count;
+      numberEl.textContent = count;
     } else {
       clearInterval(interval);
       overlay.classList.add("hidden");
@@ -165,33 +212,60 @@ function startCountdown(mode) {
 
 function launchMode(mode) {
   const canvas = document.getElementById("game-canvas");
+  // Sett canvasets interne oppløsning til å matche faktisk visningsstørrelse,
+  // slik at spillflaten fyller skjermen uansett skjermstørrelse/oppløsning
+  // (i stedet for en fast piksel-størrelse med luft rundt).
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  // Noen moduser sikter ikke med musa, og trenger synlig musepeker
+  canvas.classList.toggle("show-cursor", mode.showCursor === true);
   const ctx = canvas.getContext("2d");
-  mode.start(canvas, ctx, (result) => onRoundComplete(mode, result));
+  mode.start(canvas, ctx, (result) => {
+    // Kort pause slik at et klikk/tastetrykk fra slutten av runden ikke
+    // treffer knappene som dukker opp på resultatskjermen.
+    setTimeout(() => onRoundComplete(mode, result), 400);
+  });
 }
 
 async function onRoundComplete(mode, result) {
-  const { score, hits, shots } = result;
+  const { score, stats = [] } = result;
 
   showScreen("result");
+  lockResultButtons();
   document.getElementById("result-score").textContent = score;
-  document.getElementById("result-hits").textContent = hits;
-  document.getElementById("result-shots").textContent = shots;
+  renderResultStats(stats);
   document.getElementById("result-context").textContent = "Lagrer resultat...";
+  document.getElementById("result-banner").className = "result-banner hidden";
+  document.getElementById("result-personal-best").textContent = "";
+
+  const extra = {};
+  stats.forEach((s) => {
+    if (typeof s.value === "number") {
+      extra[slugify(s.label)] = s.value;
+    }
+  });
 
   try {
-    await submitScore({
+    const { previousBest, isNewRecord } = await submitScore({
       nickname: state.nickname,
       groupId: state.group.id,
       groupName: state.group.name,
+      modeId: mode.id,
       score,
-      hits,
-      shots
+      extra
     });
 
-    const weekly = await getWeeklyLeaderboard(state.group.id, 200);
+    showRecordBanner(isNewRecord, previousBest, score);
+
+    state.leaderboardModeId = mode.id;
+    sidebarModeSelect.value = mode.id;
+    state.activeTab = "weekly";
+    syncSidebarTabButtons();
+
+    const weekly = await getWeeklyLeaderboard(state.group.id, mode.id, 200);
     const rank = findRank(weekly, state.nickname);
     document.getElementById("result-context").textContent = rank
-      ? `Du er nå #${rank} på ukens liste for ${state.group.name}!`
+      ? `Du er nå #${rank} på treningens ${mode.displayName}-liste for ${state.group.name}`
       : "Resultatet er lagret.";
 
     renderSidebarLeaderboard();
@@ -202,8 +276,72 @@ async function onRoundComplete(mode, result) {
   }
 }
 
+function lockResultButtons() {
+  // Hindrer at et klikk fra siste sekund av spillet "faller gjennom"
+  // og trykker på en knapp som nettopp dukket opp.
+  const buttons = [
+    document.getElementById("play-again-btn"),
+    document.getElementById("back-to-hub-btn")
+  ];
+  buttons.forEach((b) => {
+    b.disabled = true;
+    b.classList.add("btn-locked");
+  });
+  setTimeout(() => {
+    buttons.forEach((b) => {
+      b.disabled = false;
+      b.classList.remove("btn-locked");
+    });
+  }, 1000);
+}
+
+function showRecordBanner(isNewRecord, previousBest, score) {
+  const banner = document.getElementById("result-banner");
+  const pbText = document.getElementById("result-personal-best");
+
+  if (previousBest === null) {
+    banner.className = "result-banner result-banner-first";
+    banner.textContent = "Første resultat lagret!";
+    pbText.textContent = "Dette blir din personlige rekord å slå neste gang.";
+  } else if (isNewRecord) {
+    banner.className = "result-banner result-banner-record";
+    banner.textContent = "NY PERSONLIG REKORD!";
+    pbText.textContent = `Forrige beste: ${previousBest} — du forbedret deg med ${score - previousBest} poeng`;
+  } else {
+    banner.className = "result-banner result-banner-normal";
+    banner.textContent = `${previousBest - score} poeng unna din rekord`;
+    pbText.textContent = `Din beste: ${previousBest}`;
+  }
+}
+
+function renderResultStats(stats) {
+  const container = document.getElementById("result-extra-stats");
+  container.innerHTML = "";
+  stats.forEach((s) => {
+    const block = document.createElement("div");
+    block.className = "stat-block";
+    block.innerHTML = `
+      <span class="stat-value">${s.value}</span>
+      <span class="stat-label">${escapeHtml(s.label)}</span>
+    `;
+    container.appendChild(block);
+  });
+}
+
+function slugify(str) {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_");
+}
+
 document.getElementById("play-again-btn").addEventListener("click", () => {
-  enterHub();
+  if (state.activeMode) {
+    startCountdown(state.activeMode);
+  } else {
+    enterHub();
+  }
 });
 
 document.getElementById("back-to-hub-btn").addEventListener("click", () => {
@@ -211,7 +349,7 @@ document.getElementById("back-to-hub-btn").addEventListener("click", () => {
 });
 
 // ------------------------------------------------------------
-// 5. Highscore - sidepanel (faner + topp 200 med scroll)
+// 5. Highscore - sidepanel (modusvalg + faner + topp 200 med scroll)
 // ------------------------------------------------------------
 function setupTabs(tabContainerId, onChange) {
   const container = document.getElementById(tabContainerId);
@@ -224,11 +362,22 @@ function setupTabs(tabContainerId, onChange) {
   });
 }
 
-async function fetchLeaderboardForTab(tab) {
+function populateModeSelect(selectEl) {
+  selectEl.innerHTML = "";
+  PLAYABLE_MODES.forEach((mode) => {
+    const opt = document.createElement("option");
+    opt.value = mode.id;
+    opt.textContent = mode.displayName;
+    selectEl.appendChild(opt);
+  });
+  selectEl.value = state.leaderboardModeId;
+}
+
+async function fetchLeaderboardForTab(tab, modeId) {
   if (!state.group) return [];
-  if (tab === "weekly") return getWeeklyLeaderboard(state.group.id, 200);
-  if (tab === "group") return getGroupAllTimeLeaderboard(state.group.id, 200);
-  return getGlobalAllTimeLeaderboard(200);
+  if (tab === "weekly") return getWeeklyLeaderboard(state.group.id, modeId, 200);
+  if (tab === "group") return getGroupAllTimeLeaderboard(state.group.id, modeId, 200);
+  return getGlobalAllTimeLeaderboard(modeId, 200);
 }
 
 function renderLeaderboardRows(listEl, entries, showGroup) {
@@ -243,7 +392,7 @@ function renderLeaderboardRows(listEl, entries, showGroup) {
     row.innerHTML = `
       <span class="lb-rank">${entry.rank}</span>
       <span class="lb-name">${escapeHtml(entry.nickname)}${
-      showGroup ? ` <span class="lb-group-tag">(${escapeHtml(entry.groupName || "")})</span>` : ""
+      showGroup ? `<span class="lb-group-tag">${escapeHtml(entry.groupName || "")}</span>` : ""
     }</span>
       <span class="lb-score">${entry.score}</span>
     `;
@@ -257,10 +406,17 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function syncSidebarTabButtons() {
+  const container = document.getElementById("sidebar-lb-tabs");
+  container.querySelectorAll(".lb-tab").forEach((b) => {
+    b.classList.toggle("active", b.dataset.tab === state.activeTab);
+  });
+}
+
 async function renderSidebarLeaderboard() {
   const listEl = document.getElementById("sidebar-lb-list");
   listEl.innerHTML = `<div class="lb-loading">Laster...</div>`;
-  const entries = await fetchLeaderboardForTab(state.activeTab);
+  const entries = await fetchLeaderboardForTab(state.activeTab, state.leaderboardModeId);
   renderLeaderboardRows(listEl, entries, state.activeTab === "global");
 }
 
@@ -269,40 +425,11 @@ setupTabs("sidebar-lb-tabs", (tab) => {
   renderSidebarLeaderboard();
 });
 
-// ------------------------------------------------------------
-// 6. Full highscore-side
-// ------------------------------------------------------------
-let fullBoardTab = "weekly";
-
-document.getElementById("open-full-leaderboard-btn").addEventListener("click", () => {
-  showScreen("fullLeaderboard");
-  fullBoardTab = state.activeTab;
-  syncFullBoardTabButtons();
-  renderFullLeaderboard();
+populateModeSelect(sidebarModeSelect);
+sidebarModeSelect.addEventListener("change", () => {
+  state.leaderboardModeId = sidebarModeSelect.value;
+  renderSidebarLeaderboard();
 });
-
-document.getElementById("close-full-leaderboard-btn").addEventListener("click", () => {
-  showScreen("hub");
-});
-
-setupTabs("full-lb-tabs", (tab) => {
-  fullBoardTab = tab;
-  renderFullLeaderboard();
-});
-
-function syncFullBoardTabButtons() {
-  const container = document.getElementById("full-lb-tabs");
-  container.querySelectorAll(".lb-tab").forEach((b) => {
-    b.classList.toggle("active", b.dataset.tab === fullBoardTab);
-  });
-}
-
-async function renderFullLeaderboard() {
-  const listEl = document.getElementById("full-lb-list");
-  listEl.innerHTML = `<div class="lb-loading">Laster...</div>`;
-  const entries = await fetchLeaderboardForTab(fullBoardTab);
-  renderLeaderboardRows(listEl, entries, fullBoardTab === "global");
-}
 
 // ------------------------------------------------------------
 // Init

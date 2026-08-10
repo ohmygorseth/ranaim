@@ -7,9 +7,9 @@ rules_version = '2';
 // juks (urealistiske tall), men er ikke vanntett mot en
 // teknisk kyndig person som virkelig prøver å jukse.
 //
-// Maks mulig score i Gridshot: teoretisk urealistisk høyt hvis
-// noen klikker fort - vi setter en generøs, men begrensende,
-// øvre grense. Juster MAX_SCORE / MAX_HITS ved behov.
+// Validering er generisk (gjelder alle moduser) siden ulike
+// moduser har ulike ekstra felt (f.eks. hits/shots i Gridshot,
+// ingen tilsvarende felt i Tracking).
 // ============================================================
 
 service cloud.firestore {
@@ -20,28 +20,23 @@ service cloud.firestore {
       return d.nickname is string
         && d.nickname.size() > 0
         && d.nickname.size() <= 20
+        && d.modeId is string
         && d.score is number
-        && d.hits is number
-        && d.shots is number
-        && d.hits >= 0
-        && d.shots >= 0
-        && d.hits <= d.shots
-        && d.shots <= 150      // umulig å avfyre mer enn ~5 klikk/sek i 30 sek
         && d.score >= 0
-        && d.score <= 30000;   // generøs øvre grense for gridshot-scoreformelen
+        && d.score <= 30000; // generøs øvre grense på tvers av moduser
     }
 
-    match /groups/{groupId}/weekly/{weekId}/entries/{entryId} {
+    match /groups/{groupId}/modes/{modeId}/weekly/{weekId}/entries/{entryId} {
       allow read: if true;
       allow write: if isValidScoreEntry();
     }
 
-    match /groups/{groupId}/alltime/{entryId} {
+    match /groups/{groupId}/modes/{modeId}/alltime/{entryId} {
       allow read: if true;
       allow write: if isValidScoreEntry();
     }
 
-    match /globalAllTime/{entryId} {
+    match /globalAllTime/{modeId}/entries/{entryId} {
       allow read: if true;
       allow write: if isValidScoreEntry();
     }

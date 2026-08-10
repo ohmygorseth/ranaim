@@ -13,42 +13,42 @@ export const GROUPS = [
   {
     id: "fredag-fodt-2010-2013",
     name: "Fredag født 2010-2013",
-    password: "fredag1"
+    password: "strafe"
   },
   {
     id: "fredag-fodt-2014-2017",
     name: "Fredag født 2014-2017",
-    password: "fredag2"
+    password: "flick"
   },
   {
     id: "sondag-counter-strike-2",
     name: "Søndag Counter Strike 2",
-    password: "sondagcs2"
+    password: "crosshair"
   },
   {
     id: "sondag-gr1-fodt-2014-2017",
     name: "Søndag gr 1 født 2014-2017",
-    password: "sondag1"
+    password: "noob"
   },
   {
     id: "sondag-gr2-fodt-2014-2017",
     name: "Søndag gr 2 født 2014-2017",
-    password: "sondag2"
+    password: "bhop"
   },
   {
     id: "teknisk-og-trenere",
     name: "Teknisk og trenere",
-    password: "teknisk"
+    password: "sens"
   },
   {
     id: "torsdag-fodt-2010-2013",
     name: "Torsdag født 2010-2013",
-    password: "torsdag1"
+    password: "wasd"
   },
   {
     id: "torsdag-fodt-2014-2017",
     name: "Torsdag født 2014-2017",
-    password: "torsdag2"
+    password: "dpi"
   }
   // Legg til flere grupper her etter samme mønster:
   // {
