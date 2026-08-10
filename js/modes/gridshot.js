@@ -7,15 +7,19 @@
 // ============================================================
 
 import { drawCrosshair } from "../crosshair.js";
+import { getScale } from "../scale.js";
 
 const ROUND_SECONDS = 30;
 const GRID_COLS = 6;
 const GRID_ROWS = 4;
-const TARGET_RADIUS = 50;
+const BASE_TARGET_RADIUS = 50;
 
 let ctx = null;
 let canvas = null;
 let onCompleteCallback = null;
+
+let scale = 1;
+let targetRadius = BASE_TARGET_RADIUS;
 
 let hits = 0;
 let shots = 0;
@@ -39,6 +43,9 @@ export const gridshot = {
     canvas = canvasEl;
     ctx = context;
     onCompleteCallback = onComplete;
+
+    scale = getScale(canvas);
+    targetRadius = BASE_TARGET_RADIUS * scale;
 
     hits = 0;
     shots = 0;
@@ -140,7 +147,7 @@ function handleClick(e) {
   const dy = mouseY - target.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
-  if (dist <= TARGET_RADIUS) {
+  if (dist <= targetRadius) {
     hits += 1;
     playSound("hit");
     spawnTarget();
@@ -160,10 +167,10 @@ function draw() {
   // Mål
   if (target) {
     ctx.beginPath();
-    ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
+    ctx.arc(target.x, target.y, targetRadius, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
     ctx.fill();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 4 * scale;
     ctx.strokeStyle = "#1b3a70";
     ctx.stroke();
   }
@@ -178,7 +185,7 @@ function draw() {
   ctx.fillText(`Treff: ${hits}`, hudX, hudLine * 1.9);
   ctx.fillText(`Skudd: ${shots}`, hudX, hudLine * 2.8);
 
-  drawCrosshair(ctx, mouseX, mouseY);
+  drawCrosshair(ctx, mouseX, mouseY, scale);
 }
 
 

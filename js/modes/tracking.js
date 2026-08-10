@@ -13,17 +13,22 @@
 // ============================================================
 
 import { drawCrosshair } from "../crosshair.js";
+import { getScale } from "../scale.js";
 
 const ROUND_SECONDS = 30;
-const TARGET_RADIUS = 46;
-const START_SPEED = 147; // piksler per sekund
-const END_SPEED = 473; // piksler per sekund ved slutten av runden
-const EDGE_MARGIN = 80; // hvor nær kanten sveipene snur
+const BASE_TARGET_RADIUS = 46;
+const BASE_START_SPEED = 147; // piksler per sekund
+const BASE_END_SPEED = 473; // piksler per sekund ved slutten av runden
+const BASE_EDGE_MARGIN = 80; // hvor nær kanten sveipene snur
 const ARROW_WARNING_SECONDS = 0.75; // hvor lenge før snuing pilen vises
 
 let ctx = null;
 let canvas = null;
 let onCompleteCallback = null;
+
+let scale = 1;
+let targetRadius = BASE_TARGET_RADIUS;
+let edgeMargin = BASE_EDGE_MARGIN;
 
 let timeLeft = ROUND_SECONDS;
 let elapsed = 0;
@@ -53,6 +58,10 @@ export const tracking = {
     canvas = canvasEl;
     ctx = context;
     onCompleteCallback = onComplete;
+
+    scale = getScale(canvas);
+    targetRadius = BASE_TARGET_RADIUS * scale;
+    edgeMargin = BASE_EDGE_MARGIN * scale;
 
     timeLeft = ROUND_SECONDS;
     elapsed = 0;
@@ -121,7 +130,7 @@ function loop(now) {
   const dx = mouseX - target.x;
   const dy = mouseY - target.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
-  const isOnTarget = dist <= TARGET_RADIUS;
+  const isOnTarget = dist <= targetRadius;
 
   if (isOnTarget) {
     onTargetTime += dt;
@@ -134,15 +143,15 @@ function loop(now) {
 
 function currentSpeed() {
   const progress = Math.min(elapsed / ROUND_SECONDS, 1);
-  return START_SPEED + (END_SPEED - START_SPEED) * progress;
+  return (BASE_START_SPEED + (BASE_END_SPEED - BASE_START_SPEED) * progress) * scale;
 }
 
 // Beregner et sveip-mål ut fra et startpunkt og forrige akse.
 // Returnerer både punktet og hvilken akse som ble valgt.
 // Aksene er "x" (vannrett), "y" (loddrett) og "diag" (på skrå).
 function computeWaypoint(from, prevAxis) {
-  const marginX = Math.max(EDGE_MARGIN, TARGET_RADIUS + 20);
-  const marginY = Math.max(EDGE_MARGIN, TARGET_RADIUS + 20);
+  const marginX = Math.max(edgeMargin, targetRadius + 20 * scale);
+  const marginY = Math.max(edgeMargin, targetRadius + 20 * scale);
 
   const minX = marginX;
   const maxX = canvas.width - marginX;
@@ -265,8 +274,8 @@ function drawTurnArrow() {
   // Fader inn: 0 ved terskelen, 1 idet snuingen skjer
   const strength = 1 - timeLeftToTurn / ARROW_WARNING_SECONDS;
 
-  const len = TARGET_RADIUS * 0.62;
-  const headLen = TARGET_RADIUS * 0.36;
+  const len = targetRadius * 0.62;
+  const headLen = targetRadius * 0.36;
   const cx = target.x;
   const cy = target.y;
 
@@ -286,7 +295,7 @@ function drawTurnArrow() {
   ctx.beginPath();
   ctx.moveTo(tailX, tailY);
   ctx.lineTo(tipX - dir.x * headLen * 0.8, tipY - dir.y * headLen * 0.8);
-  ctx.lineWidth = TARGET_RADIUS * 0.16;
+  ctx.lineWidth = targetRadius * 0.16;
   ctx.lineCap = "round";
   ctx.strokeStyle = "#e6493f";
   ctx.stroke();
@@ -326,10 +335,10 @@ function draw(isOnTarget) {
   // Mål - grønn kant når crosshair er på målet, hvit ellers
   if (target) {
     ctx.beginPath();
-    ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
+    ctx.arc(target.x, target.y, targetRadius, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
     ctx.fill();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 4 * scale;
     ctx.strokeStyle = isOnTarget ? "#3ecf6e" : "#1b3a70";
     ctx.stroke();
 
@@ -346,6 +355,6 @@ function draw(isOnTarget) {
   ctx.fillText(`Tid: ${timeLeft}s`, hudX, hudLine);
   ctx.fillText(`Treffprosent: ${currentPercent}%`, hudX, hudLine * 1.9);
 
-  drawCrosshair(ctx, mouseX, mouseY);
+  drawCrosshair(ctx, mouseX, mouseY, scale);
 }
 

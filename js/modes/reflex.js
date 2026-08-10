@@ -14,16 +14,20 @@
 // ============================================================
 
 import { drawCrosshair } from "../crosshair.js";
+import { getScale } from "../scale.js";
 
 const ROUND_SECONDS = 30;
 const TARGET_LIFETIME_MS = 1400;
 const GRID_COLS = 6;
 const GRID_ROWS = 4;
-const TARGET_RADIUS = 50;
+const BASE_TARGET_RADIUS = 50;
 
 let ctx = null;
 let canvas = null;
 let onCompleteCallback = null;
+
+let scale = 1;
+let targetRadius = BASE_TARGET_RADIUS;
 
 let hits = 0;
 let totalClicks = 0;
@@ -51,6 +55,9 @@ export const reflex = {
     canvas = canvasEl;
     ctx = context;
     onCompleteCallback = onComplete;
+
+    scale = getScale(canvas);
+    targetRadius = BASE_TARGET_RADIUS * scale;
 
     hits = 0;
     totalClicks = 0;
@@ -163,7 +170,7 @@ function handleClick(e) {
   const dy = mouseY - target.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
-  if (dist <= TARGET_RADIUS) {
+  if (dist <= targetRadius) {
     hits += 1;
     playSound("hit");
     spawnTarget();
@@ -185,17 +192,17 @@ function draw(now) {
     const lifeRatio = Math.max(0, 1 - (now - targetSpawnTime) / TARGET_LIFETIME_MS);
 
     ctx.beginPath();
-    ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
+    ctx.arc(target.x, target.y, targetRadius, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
     ctx.fill();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 4 * scale;
     ctx.strokeStyle = "#1b3a70";
     ctx.stroke();
 
     // Krympende tidsring rundt målet
     ctx.beginPath();
-    ctx.arc(target.x, target.y, TARGET_RADIUS + 8, -Math.PI / 2, -Math.PI / 2 + lifeRatio * Math.PI * 2);
-    ctx.lineWidth = 3;
+    ctx.arc(target.x, target.y, targetRadius + 8 * scale, -Math.PI / 2, -Math.PI / 2 + lifeRatio * Math.PI * 2);
+    ctx.lineWidth = 3 * scale;
     ctx.strokeStyle = lifeRatio > 0.3 ? "#3ecf6e" : "#e6493f";
     ctx.stroke();
   }
@@ -210,7 +217,7 @@ function draw(now) {
   ctx.fillText(`Treff: ${hits}`, hudX, hudLine * 1.9);
   ctx.fillText(`Utløpt: ${expiredCount}`, hudX, hudLine * 2.8);
 
-  drawCrosshair(ctx, mouseX, mouseY);
+  drawCrosshair(ctx, mouseX, mouseY, scale);
 }
 
 

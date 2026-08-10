@@ -8,19 +8,25 @@
 
 const COLOR = "#00E5FF"; // cyan - skiller seg tydelig fra hvite mål og mørkeblå bakgrunn
 const OUTLINE = "#001018"; // nesten svart kontur
-const SIZE = 16; // lengden på hver strek
-const GAP = 5; // åpning i midten
-const THICKNESS = 3;
-const OUTLINE_THICKNESS = THICKNESS + 3;
-const DOT_RADIUS = 2;
+const BASE_SIZE = 16; // lengden på hver strek
+const BASE_GAP = 5; // åpning i midten
+const BASE_THICKNESS = 3;
+const BASE_DOT_RADIUS = 2;
 
 /**
  * Tegner crosshair på gitt posisjon.
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} x
  * @param {number} y
+ * @param {number} [scale] skaleringsfaktor for spillflaten
  */
-export function drawCrosshair(ctx, x, y) {
+export function drawCrosshair(ctx, x, y, scale = 1) {
+  const SIZE = BASE_SIZE * scale;
+  const GAP = BASE_GAP * scale;
+  const THICKNESS = BASE_THICKNESS * scale;
+  const OUTLINE_THICKNESS = THICKNESS + 3 * scale;
+  const DOT_RADIUS = BASE_DOT_RADIUS * scale;
+
   ctx.save();
   ctx.lineCap = "round";
 
@@ -50,7 +56,7 @@ export function drawCrosshair(ctx, x, y) {
 
   // Senterprikk, også med kontur
   ctx.beginPath();
-  ctx.arc(x, y, DOT_RADIUS + 1.5, 0, Math.PI * 2);
+  ctx.arc(x, y, DOT_RADIUS + 1.5 * scale, 0, Math.PI * 2);
   ctx.fillStyle = OUTLINE;
   ctx.fill();
 

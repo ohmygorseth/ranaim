@@ -212,6 +212,7 @@ function startCountdown(mode) {
 
 function launchMode(mode) {
   const canvas = document.getElementById("game-canvas");
+  maybeWarnSmallWindow();
   // Sett canvasets interne oppløsning til å matche faktisk visningsstørrelse,
   // slik at spillflaten fyller skjermen uansett skjermstørrelse/oppløsning
   // (i stedet for en fast piksel-størrelse med luft rundt).
@@ -274,6 +275,16 @@ async function onRoundComplete(mode, result) {
     document.getElementById("result-context").textContent =
       "Klarte ikke å lagre resultatet. Sjekk internettforbindelsen.";
   }
+}
+
+// Spillelementene skaleres etter vindusstørrelsen, men i et veldig
+// lite vindu blir museavstandene så korte at det uansett blir lettere.
+// Vi gir derfor en påminnelse om å maksimere vinduet.
+function maybeWarnSmallWindow() {
+  const banner = document.getElementById("small-window-warning");
+  if (!banner) return;
+  const tooSmall = window.innerWidth < 1200 || window.innerHeight < 650;
+  banner.classList.toggle("hidden", !tooSmall);
 }
 
 function lockResultButtons() {

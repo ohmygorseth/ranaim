@@ -482,6 +482,23 @@ input {
   max-height: 88vh;
 }
 
+.small-window-warning {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-red);
+  color: var(--white);
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.4px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .game-watermark {
   position: absolute;
   right: 18px;
