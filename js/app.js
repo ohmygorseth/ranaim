@@ -24,7 +24,7 @@ import {
 // Moduler tilgjengelig i hub-en. Legg til nye her når de er klare
 // (sett comingSoon: false når modulen er ferdig implementert).
 // ------------------------------------------------------------
-const MODES = [gridshot, tracking, reflex, trackMode, keyboardMouseMode, wasdMode];
+const MODES = [gridshot, reflex, tracking, trackMode, wasdMode, keyboardMouseMode];
 
 const PLAYABLE_MODES = MODES.filter((m) => !m.comingSoon);
 
