@@ -535,6 +535,18 @@ input {
   z-index: 5;
 }
 
+.escape-hint {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600;
+  font-size: clamp(12px, 0.9vw, 16px);
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.32);
+  pointer-events: none;
+}
+
 .game-watermark {
   position: absolute;
   right: 18px;

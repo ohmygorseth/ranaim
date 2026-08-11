@@ -187,6 +187,9 @@ document.getElementById("change-group-btn").addEventListener("click", () => {
 // ------------------------------------------------------------
 // 4. Nedtelling + spill
 // ------------------------------------------------------------
+let countdownInterval = null;
+let roundActive = false;
+
 function startCountdown(mode) {
   state.activeMode = mode;
   showScreen("game");
@@ -195,21 +198,52 @@ function startCountdown(mode) {
   canvas.classList.add("hidden");
   overlay.classList.remove("hidden");
 
+  roundActive = true;
+
   let count = 3;
   const numberEl = document.getElementById("countdown-number");
   numberEl.textContent = count;
-  const interval = setInterval(() => {
+  countdownInterval = setInterval(() => {
     count -= 1;
     if (count > 0) {
       numberEl.textContent = count;
     } else {
-      clearInterval(interval);
+      clearInterval(countdownInterval);
+      countdownInterval = null;
       overlay.classList.add("hidden");
       canvas.classList.remove("hidden");
       launchMode(mode);
     }
   }, 1000);
 }
+
+/**
+ * Avbryter pågående nedtelling eller runde og går tilbake til menyen.
+ * Resultatet lagres ikke.
+ */
+function abortRound() {
+  if (!roundActive) return;
+  roundActive = false;
+
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+
+  if (state.activeMode && typeof state.activeMode.stop === "function") {
+    state.activeMode.stop();
+  }
+
+  document.getElementById("countdown-overlay").classList.add("hidden");
+  enterHub();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (screens.game.classList.contains("hidden")) return;
+  e.preventDefault();
+  abortRound();
+});
 
 function launchMode(mode) {
   const canvas = document.getElementById("game-canvas");
@@ -222,6 +256,9 @@ function launchMode(mode) {
   canvas.classList.toggle("show-cursor", mode.showCursor === true);
   const ctx = canvas.getContext("2d");
   mode.start(canvas, ctx, (result) => {
+    // Ikke lagre resultatet hvis runden ble avbrutt
+    if (!roundActive) return;
+    roundActive = false;
     // Kort pause slik at et klikk/tastetrykk fra slutten av runden ikke
     // treffer knappene som dukker opp på resultatskjermen.
     setTimeout(() => onRoundComplete(mode, result), 400);
