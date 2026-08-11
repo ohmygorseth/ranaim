@@ -3,9 +3,9 @@
 // ============================================================
 // Følger samme modul-grensesnitt: start(canvas, ctx, onComplete) / stop()
 //
-// Formål: lære riktig håndgrep på WASD + Space, og øve på
-// kombinasjonstrykk (f.eks. W+A for å gå skrått opp til venstre,
-// eller W+A+Space for å hoppe mens man går skrått).
+// Formål: øve på WASD + Space og kombinasjonstrykk (f.eks. W+A for
+// å gå skrått opp til venstre, eller W+A+Space for å hoppe mens man
+// går skrått).
 //
 // Progresjon gjennom runden:
 //   0-33%   : kun enkelttaster (W, A, S, D, Space)
@@ -19,7 +19,6 @@
 import { playSound } from "../sound.js";
 
 const ROUND_SECONDS = 30;
-const INTRO_SECONDS = 5; // håndposisjon-forklaring før runden starter
 
 // Retningskombinasjoner (kun de som gir mening i spill)
 const SINGLE_KEYS = [
@@ -48,15 +47,6 @@ const TRIPLE_KEYS = [
   { codes: ["KeyS", "KeyD", "Space"], label: "S + D + SPACE" }
 ];
 
-// Fingerfarger for håndposisjon-forklaringen
-const FINGER_INFO = {
-  KeyA: { finger: "Ringfinger", color: "#EF9F27" },
-  KeyW: { finger: "Langfinger", color: "#7F77DD" },
-  KeyS: { finger: "Langfinger", color: "#7F77DD" },
-  KeyD: { finger: "Pekefinger", color: "#1D9E75" },
-  Space: { finger: "Tommel", color: "#D85A30" }
-};
-
 // Tastaturlayout for tegning
 const KEY_LAYOUT = [
   [{ code: "KeyW", label: "W" }],
@@ -72,8 +62,6 @@ let ctx = null;
 let canvas = null;
 let onCompleteCallback = null;
 
-let phase = "intro"; // intro | playing
-let introTimeLeft = INTRO_SECONDS;
 let timeLeft = ROUND_SECONDS;
 let running = false;
 
@@ -99,8 +87,6 @@ export const wasdMode = {
     ctx = context;
     onCompleteCallback = onComplete;
 
-    phase = "intro";
-    introTimeLeft = INTRO_SECONDS;
     timeLeft = ROUND_SECONDS;
     correctCount = 0;
     wrongCount = 0;
@@ -113,21 +99,14 @@ export const wasdMode = {
     window.addEventListener("keydown", keydownHandler);
     window.addEventListener("keyup", keyupHandler);
 
+    pickNewChallenge();
     draw();
 
     timerInterval = setInterval(() => {
-      if (phase === "intro") {
-        introTimeLeft -= 1;
-        if (introTimeLeft <= 0) {
-          phase = "playing";
-          pickNewChallenge();
-        }
-      } else {
-        timeLeft -= 1;
-        if (timeLeft <= 0) {
-          endRound();
-          return;
-        }
+      timeLeft -= 1;
+      if (timeLeft <= 0) {
+        endRound();
+        return;
       }
       draw();
     }, 1000);
@@ -190,7 +169,7 @@ function isRelevantKey(code) {
 function handleKeydown(e) {
   if (!running || !isRelevantKey(e.code)) return;
   e.preventDefault();
-  if (phase !== "playing" || !currentChallenge) return;
+  if (!currentChallenge) return;
 
   heldKeys.add(e.code);
   checkCombination();
@@ -241,34 +220,7 @@ function draw() {
   ctx.fillStyle = "#0d1b33";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  if (phase === "intro") {
-    drawIntro();
-  } else {
-    drawGame();
-  }
-}
-
-function drawIntro() {
-  ctx.textAlign = "center";
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 40px 'Saira Condensed', sans-serif";
-  ctx.fillText("Slik holder du hånden", canvas.width / 2, canvas.height * 0.12);
-
-  ctx.font = "20px 'Saira Condensed', sans-serif";
-  ctx.fillStyle = "#d7dce5";
-  ctx.fillText(
-    "Legg fingrene på tastene slik som vist under",
-    canvas.width / 2,
-    canvas.height * 0.18
-  );
-
-  drawKeyboard(true);
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#3ecf6e";
-  ctx.font = "bold 32px 'Saira Condensed', sans-serif";
-  ctx.fillText(`Starter om ${introTimeLeft}...`, canvas.width / 2, canvas.height * 0.96);
+  drawGame();
 }
 
 function drawGame() {
@@ -302,20 +254,17 @@ function drawGame() {
     ctx.fillText(hint, canvas.width / 2, canvas.height * 0.31);
   }
 
-  drawKeyboard(false);
+  drawKeyboard();
 }
 
-function drawKeyboard(showFingers) {
+function drawKeyboard() {
   const keyW = Math.min(canvas.width * 0.11, canvas.height * 0.17);
   const keyH = keyW * 0.85;
   const gap = keyW * 0.14;
   const spaceW = keyW * 3 + gap * 2;
 
-  // I intro trenger vi ekstra plass under hver rad til fingernavnet
-  const labelSpace = showFingers ? keyW * 0.42 : 0;
-  const rowStep = keyH + gap + labelSpace;
-
-  const startY = showFingers ? canvas.height * 0.26 : canvas.height * 0.42;
+  const rowStep = keyH + gap;
+  const startY = canvas.height * 0.42;
 
   KEY_LAYOUT.forEach((row, rowIndex) => {
     const rowY = startY + rowIndex * rowStep;
@@ -330,18 +279,14 @@ function drawKeyboard(showFingers) {
 
     row.forEach((key) => {
       const width = key.wide ? spaceW : keyW;
-      const isTarget =
-        !showFingers && currentChallenge && currentChallenge.codes.includes(key.code);
+      const isTarget = currentChallenge && currentChallenge.codes.includes(key.code);
       const isHeld = heldKeys.has(key.code);
-      const finger = FINGER_INFO[key.code];
 
       // Tastebakgrunn
       ctx.beginPath();
       roundedRect(x, rowY, width, keyH, 10);
 
-      if (showFingers) {
-        ctx.fillStyle = finger.color;
-      } else if (isHeld && isTarget) {
+      if (isHeld && isTarget) {
         ctx.fillStyle = "#3ecf6e";
       } else if (isHeld) {
         ctx.fillStyle = "#e6493f";
@@ -357,19 +302,11 @@ function drawKeyboard(showFingers) {
       ctx.stroke();
 
       // Tastebokstav
-      ctx.fillStyle = showFingers || isHeld ? "#0d1b33" : "#ffffff";
+      ctx.fillStyle = isHeld ? "#0d1b33" : "#ffffff";
       ctx.font = `bold ${Math.round(keyW * 0.3)}px 'Saira Condensed', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(key.label, x + width / 2, rowY + keyH / 2);
-
-      // Fingernavn under tasten (kun i intro)
-      if (showFingers) {
-        ctx.fillStyle = finger.color;
-        ctx.font = `bold ${Math.round(keyW * 0.19)}px 'Saira Condensed', sans-serif`;
-        ctx.textBaseline = "top";
-        ctx.fillText(finger.finger, x + width / 2, rowY + keyH + 6);
-      }
 
       ctx.textBaseline = "alphabetic";
       x += width + gap;
