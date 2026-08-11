@@ -29,6 +29,33 @@
           <p class="subtitle">Velg din gruppe</p>
           <div id="group-list" class="group-list"></div>
         </div>
+        <button id="open-privacy-btn" class="privacy-link">Personvern</button>
+      </div>
+    </section>
+
+    <!-- SKJERM: Personvern -->
+    <section id="screen-privacy" class="screen hidden">
+      <div class="panel-center panel-wide privacy-panel">
+        <h2>Personvern</h2>
+
+        <p><strong>Hva lagres?</strong><br />
+        Kallenavnet du skriver inn, hvilken gruppe du velger, poengsummen din og tidspunktet for runden. Ingenting annet – RanAim har ingen innlogging, og vi lagrer verken e-post, telefonnummer eller fødselsdato.</p>
+
+        <p><strong>Hvem kan se det?</strong><br />
+        Highscorelistene er åpne for alle som besøker ranaim.no. Det du skriver som kallenavn blir altså synlig for andre.</p>
+
+        <p><strong>Derfor: ikke bruk ekte navn.</strong><br />
+        Velg et kallenavn som ikke røper hvem du er. Skriver du fullt navn, kan andre koble navnet ditt til gruppen din og dermed til alder og treningsdag.</p>
+
+        <p><strong>Vil du fjerne noe?</strong><br />
+        Trenerne kan slette kallenavn og resultater fra listene. Ta kontakt med treneren din i Ranheim Esport, så ordner vi det.</p>
+
+        <p><strong>Hvem har ansvaret?</strong><br />
+        RanAim er laget for og driftes av Ranheim Esport. Har foresatte spørsmål om personvern, kontakt klubben.</p>
+
+        <p class="privacy-note">Highscorene lagres hos Google Firebase (Firestore) på servere i Europa.</p>
+
+        <button id="close-privacy-btn" class="btn-link">&larr; Tilbake</button>
       </div>
     </section>
 
@@ -50,7 +77,7 @@
       <div class="panel-center">
         <h2>Skriv inn kallenavn</h2>
         <p class="nickname-group" id="nickname-group-name"></p>
-        <p class="hint-text">Ikke bruk ditt ekte navn. Upassende navn slettes av trenerne.</p>
+        <p class="hint-text"><strong>Ikke bruk ditt ekte navn.</strong> Kallenavnet blir synlig for alle på highscorelistene. Upassende navn slettes av trenerne.</p>
         <form id="nickname-form">
           <input type="text" id="nickname-input" maxlength="20" placeholder="Kallenavn" autocomplete="off" required />
           <button type="submit" class="btn-primary">Gå videre</button>

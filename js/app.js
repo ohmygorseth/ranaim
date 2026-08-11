@@ -51,7 +51,8 @@ const screens = {
   nickname: document.getElementById("screen-nickname"),
   hub: document.getElementById("screen-hub"),
   game: document.getElementById("screen-game"),
-  result: document.getElementById("screen-result")
+  result: document.getElementById("screen-result"),
+  privacy: document.getElementById("screen-privacy")
 };
 
 function showScreen(name) {
@@ -526,6 +527,14 @@ function setupTouchBlocking() {
 // ------------------------------------------------------------
 // Init
 // ------------------------------------------------------------
+document.getElementById("open-privacy-btn").addEventListener("click", () => {
+  showScreen("privacy");
+});
+
+document.getElementById("close-privacy-btn").addEventListener("click", () => {
+  showScreen("groupSelect");
+});
+
 setupTouchBlocking();
 setupMuteButton();
 renderGroupSelect();

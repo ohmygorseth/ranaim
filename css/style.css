@@ -63,6 +63,50 @@ html, body {
 }
 
 
+.privacy-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: underline;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  align-self: center;
+}
+
+.privacy-link:hover {
+  color: var(--white);
+}
+
+.privacy-panel {
+  text-align: left;
+}
+
+.privacy-panel h2 {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.privacy-panel p {
+  font-size: clamp(14px, 1vw, 17px);
+  line-height: 1.55;
+  margin: 0 0 18px;
+}
+
+.privacy-panel strong {
+  font-family: 'Saira Condensed', sans-serif;
+  font-size: 1.15em;
+  letter-spacing: 0.3px;
+}
+
+.privacy-note {
+  color: var(--grey-light);
+  font-size: clamp(12px, 0.85vw, 15px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 14px;
+}
+
 .logo-top {
   width: 100%;
   height: auto;
