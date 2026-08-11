@@ -140,6 +140,17 @@ h1 {
   text-transform: uppercase;
 }
 
+.brand-tagline {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: clamp(19px, 1.6vw, 30px);
+  color: var(--white);
+  margin: 0 0 6px;
+}
+
 .brand-subtitle {
   color: var(--grey-light);
   font-size: clamp(15px, 1.15vw, 22px);
