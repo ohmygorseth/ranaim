@@ -70,6 +70,7 @@ let correctCount = 0;
 let wrongCount = 0;
 
 const heldKeys = new Set();
+let awaitingRelease = false; // venter på at spilleren slipper tastene fra forrige utfordring
 let feedbackFlash = null; // "correct" | "wrong" | null
 let flashTimeout = null;
 
@@ -91,6 +92,7 @@ export const wasdMode = {
     correctCount = 0;
     wrongCount = 0;
     heldKeys.clear();
+    awaitingRelease = false;
     feedbackFlash = null;
     running = true;
 
@@ -179,10 +181,18 @@ function handleKeydown(e) {
 function handleKeyup(e) {
   if (!isRelevantKey(e.code)) return;
   heldKeys.delete(e.code);
+  if (heldKeys.size === 0) {
+    awaitingRelease = false;
+  }
   draw();
 }
 
 function checkCombination() {
+  // Etter en fullført utfordring holder spilleren fortsatt tastene nede.
+  // Vi venter til alt er sluppet, ellers ville de gamle tastene telt som
+  // "ekstra taster" på den nye utfordringen og gitt feil.
+  if (awaitingRelease) return;
+
   const required = currentChallenge.codes;
 
   // Alle nødvendige taster holdt inne?
@@ -201,6 +211,7 @@ function checkCombination() {
     flash("wrong");
     playSound("miss");
   }
+  awaitingRelease = true;
   pickNewChallenge();
 }
 
@@ -286,7 +297,11 @@ function drawKeyboard() {
       ctx.beginPath();
       roundedRect(x, rowY, width, keyH, 10);
 
-      if (isHeld && isTarget) {
+      if (awaitingRelease && isHeld) {
+        // Taster som fortsatt holdes fra forrige utfordring - nøytral farge,
+        // ikke rødt, siden det ikke er en feil
+        ctx.fillStyle = "#2b4a86";
+      } else if (isHeld && isTarget) {
         ctx.fillStyle = "#3ecf6e";
       } else if (isHeld) {
         ctx.fillStyle = "#e6493f";
@@ -302,7 +317,7 @@ function drawKeyboard() {
       ctx.stroke();
 
       // Tastebokstav
-      ctx.fillStyle = isHeld ? "#0d1b33" : "#ffffff";
+      ctx.fillStyle = isHeld && !awaitingRelease ? "#0d1b33" : "#ffffff";
       ctx.font = `bold ${Math.round(keyW * 0.3)}px 'Saira Condensed', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
