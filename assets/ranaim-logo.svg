@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 298 68" width="298" height="68" role="img" aria-label="RanAim">
+  <defs>
+    <clipPath id="ra-clip">
+      <rect x="0" y="0" width="298" height="68" rx="3"/>
+    </clipPath>
+  </defs>
+
+  <!-- Marineblå bakgrunn, samme farge som Ranheim-logoen -->
+  <rect width="298" height="68" rx="3" fill="#1F3378"/>
+
+  <g clip-path="url(#ra-clip)">
+    <!-- Diagonalt "swoosh"-element bak teksten -->
+    <path d="M-20 74 L118 12 L150 20 L18 80 Z" fill="#FFFFFF" opacity="0.10"/>
+    <path d="M132 74 L268 6 L318 14 L182 82 Z" fill="#FFFFFF" opacity="0.07"/>
+    <path d="M196 78 L330 18 L360 26 L226 86 Z" fill="#FFFFFF" opacity="0.05"/>
+  </g>
+
+  <!-- Ordmerke -->
+  <text x="149" y="48"
+        text-anchor="middle"
+        font-family="'Saira Condensed', 'Arial Narrow', sans-serif"
+        font-size="46"
+        font-weight="800"
+        font-style="italic"
+        letter-spacing="1"
+        fill="#FFFFFF">RANAIM</text>
+</svg>
