@@ -371,42 +371,44 @@ function drawCheckpointMarkers() {
  */
 function drawStartMarker() {
   const p = checkpointPosition(0);
-  const isNext = phase === "running" && nextCheckpoint === 0;
-  const waiting = phase === "waiting";
+
+  // Når runden er i gang, tegnes startpunktet som et vanlig
+  // kontrollpunkt - den store grønne knappen vises kun før start.
+  if (phase !== "waiting") {
+    const isNext = nextCheckpoint === 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, (isNext ? 7 : 3.5) * scale, 0, Math.PI * 2);
+    ctx.fillStyle = isNext ? "#00E5FF" : "rgba(255,255,255,0.22)";
+    ctx.fill();
+    return;
+  }
 
   const green = "#3ecf6e";
   const baseRadius = trackWidth * START_ZONE_FACTOR;
 
-  if (waiting) {
-    // Pulserende ring rundt startpunktet
-    const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 320);
-    const ringRadius = baseRadius + trackWidth * 0.45 * pulse;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, ringRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(62, 207, 110, ${0.65 * (1 - pulse) + 0.2})`;
-    ctx.lineWidth = 4 * scale;
-    ctx.stroke();
-  }
+  // Pulserende ring som trekker blikket dit
+  const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 320);
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, baseRadius + trackWidth * 0.45 * pulse, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(62, 207, 110, ${0.65 * (1 - pulse) + 0.2})`;
+  ctx.lineWidth = 4 * scale;
+  ctx.stroke();
 
   // Selve startsirkelen
   ctx.beginPath();
   ctx.arc(p.x, p.y, baseRadius, 0, Math.PI * 2);
-  ctx.fillStyle = isNext ? "#00E5FF" : green;
+  ctx.fillStyle = green;
   ctx.fill();
   ctx.lineWidth = 3 * scale;
   ctx.strokeStyle = "#ffffff";
   ctx.stroke();
 
-  // "START"-tekst ved siden av, kun før runden er i gang
-  if (waiting) {
-    ctx.save();
-    ctx.font = `bold ${Math.round(canvas.height * 0.038)}px 'Saira Condensed', sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillStyle = green;
-    ctx.fillText("START", p.x, p.y - trackWidth * 1.35);
-    ctx.restore();
-  }
+  ctx.save();
+  ctx.font = `bold ${Math.round(canvas.height * 0.038)}px 'Saira Condensed', sans-serif`;
+  ctx.textAlign = "center";
+  ctx.fillStyle = green;
+  ctx.fillText("START", p.x, p.y - trackWidth * 1.35);
+  ctx.restore();
 }
 
 function drawHud() {
