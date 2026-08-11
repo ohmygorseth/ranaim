@@ -20,6 +20,8 @@ service cloud.firestore {
       return d.nickname is string
         && d.nickname.size() > 0
         && d.nickname.size() <= 20
+        && d.nicknameKey is string
+        && d.nicknameKey.size() > 0
         && d.modeId is string
         && d.score is number
         && d.score >= 0

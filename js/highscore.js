@@ -47,10 +47,39 @@ const db = getFirestore(app);
  * @param {object} [params.extra] - modus-spesifikke ekstra felt (f.eks. hits/shots)
  * @returns {Promise<{weeklyImproved: boolean, allTimeImproved: boolean}>}
  */
+/**
+ * Normaliserer et kallenavn slik at det brukes som samme nøkkel
+ * uansett store/små bokstaver eller ekstra mellomrom.
+ * "Veggo", "veggo" og " VEGGO " blir alle til "veggo".
+ *
+ * Tegn som ikke kan brukes i en Firestore-dokument-ID (skråstreker,
+ * punktum osv.) byttes ut, ellers ville lagringen feile.
+ */
+export function normalizeNickname(nickname) {
+  return nickname
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[/\\.#$[\]]/g, "_");
+}
+
+/**
+ * Lagrer en ny runde-score i alle relevante lister
+ * (ukentlig-gruppe, evig-gruppe, evig-global), men kun hvis
+ * scoren er bedre enn spillerens tidligere beste i hver liste.
+ *
+ * @param {object} params
+ * @param {string} params.modeId - f.eks. "gridshot" eller "tracking"
+ * @param {object} [params.extra] - modus-spesifikke ekstra felt
+ * @returns {Promise<{weeklyImproved: boolean, allTimeImproved: boolean}>}
+ */
 export async function submitScore({ nickname, groupId, groupName, modeId, score, extra = {} }) {
   const weekId = getCurrentWeekId();
+  const key = normalizeNickname(nickname);
+
   const payload = {
-    nickname,
+    nickname, // vises slik spilleren skrev det
+    nicknameKey: key, // brukes til sammenligning
     groupId,
     groupName,
     modeId,
@@ -59,9 +88,9 @@ export async function submitScore({ nickname, groupId, groupName, modeId, score,
     timestamp: serverTimestamp()
   };
 
-  const weeklyRef = doc(db, "groups", groupId, "modes", modeId, "weekly", weekId, "entries", nickname);
-  const allTimeRef = doc(db, "groups", groupId, "modes", modeId, "alltime", nickname);
-  const globalRef = doc(db, "globalAllTime", modeId, "entries", `${nickname}__${groupId}`);
+  const weeklyRef = doc(db, "groups", groupId, "modes", modeId, "weekly", weekId, "entries", key);
+  const allTimeRef = doc(db, "groups", groupId, "modes", modeId, "alltime", key);
+  const globalRef = doc(db, "globalAllTime", modeId, "entries", `${key}__${groupId}`);
 
   // Hent tidligere personlig rekord FØR vi skriver, slik at vi kan
   // fortelle spilleren om de nettopp slo sin egen rekord.
@@ -121,6 +150,9 @@ async function fetchLeaderboard(ref, max) {
  * resultatskjermen: "Du er nå #X på ukens liste").
  */
 export function findRank(leaderboard, nickname) {
-  const entry = leaderboard.find((e) => e.nickname === nickname);
+  const key = normalizeNickname(nickname);
+  const entry = leaderboard.find(
+    (e) => (e.nicknameKey || normalizeNickname(e.nickname || "")) === key
+  );
   return entry ? entry.rank : null;
 }
