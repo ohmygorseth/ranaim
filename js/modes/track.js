@@ -18,6 +18,7 @@
 
 import { drawCrosshair } from "../crosshair.js";
 import { getScale } from "../scale.js";
+import { playSound } from "../sound.js";
 
 const ROUND_SECONDS = 30;
 const BASE_TRACK_WIDTH = 54; // full bredde på korridoren
@@ -401,12 +402,3 @@ function drawHud() {
   }
 }
 
-function playSound(type) {
-  const el = document.getElementById(type === "hit" ? "sound-hit" : "sound-miss");
-  if (el) {
-    el.currentTime = 0;
-    el.play().catch(() => {
-      /* ignorer autoplay-restriksjoner */
-    });
-  }
-}

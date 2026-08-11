@@ -15,6 +15,8 @@
 //   - Summen multipliseres med presisjon (riktige / alle trykk)
 // ============================================================
 
+import { playSound } from "../sound.js";
+
 const ROUND_SECONDS = 30;
 
 const REACTION_FAST_MS = 150;
@@ -428,12 +430,3 @@ function roundedRect(x, y, w, h, r) {
   ctx.closePath();
 }
 
-function playSound(type) {
-  const el = document.getElementById(type === "hit" ? "sound-hit" : "sound-miss");
-  if (el) {
-    el.currentTime = 0;
-    el.play().catch(() => {
-      /* ignorer autoplay-restriksjoner */
-    });
-  }
-}

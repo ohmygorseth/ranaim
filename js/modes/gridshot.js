@@ -8,6 +8,7 @@
 
 import { drawCrosshair } from "../crosshair.js";
 import { getScale } from "../scale.js";
+import { playSound } from "../sound.js";
 
 const ROUND_SECONDS = 30;
 const GRID_COLS = 6;
@@ -189,12 +190,3 @@ function draw() {
 }
 
 
-function playSound(type) {
-  const el = document.getElementById(type === "hit" ? "sound-hit" : "sound-miss");
-  if (el) {
-    el.currentTime = 0;
-    el.play().catch(() => {
-      /* ignorer autoplay-restriksjoner */
-    });
-  }
-}

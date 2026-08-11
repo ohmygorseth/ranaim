@@ -11,6 +11,7 @@ import { tracking } from "./modes/tracking.js";
 import { wasdMode } from "./modes/wasd.js";
 import { keyboardMouseMode } from "./modes/keyboardmouse.js";
 import { trackMode } from "./modes/track.js";
+import { isMuted, toggleMute } from "./sound.js";
 import { reflex } from "./modes/reflex.js";
 import {
   submitScore,
@@ -432,6 +433,31 @@ sidebarModeSelect.addEventListener("change", () => {
 });
 
 // ------------------------------------------------------------
+// Lyd av/på
+// ------------------------------------------------------------
+const SPEAKER_ON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
+const SPEAKER_OFF = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>`;
+
+function setupMuteButton() {
+  const btn = document.getElementById("mute-btn");
+  if (!btn) return;
+
+  const render = () => {
+    const off = isMuted();
+    btn.innerHTML = off ? SPEAKER_OFF : SPEAKER_ON;
+    btn.classList.toggle("icon-btn-off", off);
+    btn.title = off ? "Lyd er av - klikk for å skru på" : "Lyd er på - klikk for å skru av";
+  };
+
+  btn.addEventListener("click", () => {
+    toggleMute();
+    render();
+  });
+
+  render();
+}
+
+// ------------------------------------------------------------
 // Touch-sperre
 // ------------------------------------------------------------
 // Spillflaten skal kun styres med mus. På en touchskjerm kunne man
@@ -464,5 +490,6 @@ function setupTouchBlocking() {
 // Init
 // ------------------------------------------------------------
 setupTouchBlocking();
+setupMuteButton();
 renderGroupSelect();
 showScreen("groupSelect");

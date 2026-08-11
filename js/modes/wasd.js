@@ -16,6 +16,8 @@
 // Poeng = riktige kombinasjoner × presisjon × 100.
 // ============================================================
 
+import { playSound } from "../sound.js";
+
 const ROUND_SECONDS = 30;
 const INTRO_SECONDS = 5; // håndposisjon-forklaring før runden starter
 
@@ -384,12 +386,3 @@ function roundedRect(x, y, w, h, r) {
   ctx.closePath();
 }
 
-function playSound(type) {
-  const el = document.getElementById(type === "hit" ? "sound-hit" : "sound-miss");
-  if (el) {
-    el.currentTime = 0;
-    el.play().catch(() => {
-      /* ignorer autoplay-restriksjoner */
-    });
-  }
-}
