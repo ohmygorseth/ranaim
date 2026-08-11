@@ -432,7 +432,37 @@ sidebarModeSelect.addEventListener("change", () => {
 });
 
 // ------------------------------------------------------------
+// Touch-sperre
+// ------------------------------------------------------------
+// Spillflaten skal kun styres med mus. På en touchskjerm kunne man
+// ellers truffet målene direkte med fingeren, uten å sikte i det
+// hele tatt - det ville gjort highscorene usammenlignbare.
+//
+// preventDefault() på touch-hendelsene stopper også de syntetiske
+// mus-hendelsene nettleseren ellers ville sendt etterpå.
+// ------------------------------------------------------------
+function setupTouchBlocking() {
+  const canvas = document.getElementById("game-canvas");
+  const notice = document.getElementById("touch-notice");
+  let hideTimeout = null;
+
+  const block = (e) => {
+    e.preventDefault();
+    if (notice) {
+      notice.classList.remove("hidden");
+      if (hideTimeout) clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => notice.classList.add("hidden"), 2500);
+    }
+  };
+
+  ["touchstart", "touchmove", "touchend"].forEach((evt) => {
+    canvas.addEventListener(evt, block, { passive: false });
+  });
+}
+
+// ------------------------------------------------------------
 // Init
 // ------------------------------------------------------------
+setupTouchBlocking();
 renderGroupSelect();
 showScreen("groupSelect");
