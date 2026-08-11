@@ -291,13 +291,36 @@ input {
 .hub-header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+}
+
+#change-group-btn {
+  background: var(--navy);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  color: var(--white);
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(16px, 1.15vw, 21px);
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  height: 52px;
+  padding: 0 22px;
+  margin-top: 0;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#change-group-btn:hover {
+  background: var(--navy-hover);
+  border-color: var(--white);
+  color: var(--white);
 }
 
 .icon-btn {
-  width: 42px;
-  height: 42px;
-  padding: 8px;
+  width: 52px;
+  height: 52px;
+  padding: 12px;
   background: var(--navy);
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-radius: 8px;
