@@ -26,6 +26,7 @@ const CHECKPOINTS = 24; // antall kontrollpunkter per runde
 const POINTS_PER_CHECKPOINT = 50;
 const PENALTY_PER_MISS = 100;
 const SAMPLES = 720; // hvor finmasket senterlinjen samples
+const START_ZONE_FACTOR = 0.75; // startsonens radius, som andel av banebredden
 
 // Fast bane, definert som kontrollpunkter i normaliserte koordinater
 // (0-1). Glattes ut til en myk, lukket kurve ved oppstart.
@@ -257,7 +258,7 @@ function loop() {
     const startPt = checkpointPosition(0);
     const dx = mouseX - startPt.x;
     const dy = mouseY - startPt.y;
-    const atStart = Math.sqrt(dx * dx + dy * dy) <= trackWidth * 0.9;
+    const atStart = Math.sqrt(dx * dx + dy * dy) <= trackWidth * START_ZONE_FACTOR;
 
     if (mouseDown && atStart) {
       phase = "running";
@@ -349,22 +350,62 @@ function drawTrack(onTrack) {
 }
 
 function drawCheckpointMarkers() {
-  // Neste kontrollpunkt vises tydelig, resten svakt
+  // Vanlige kontrollpunkter: svake prikker. Neste punkt: tydelig cyan.
   for (let i = 0; i < CHECKPOINTS; i++) {
+    if (i === 0) continue; // startpunktet tegnes for seg selv under
     const p = checkpointPosition(i);
     const isNext = phase === "running" && i === nextCheckpoint;
-    const isStart = i === 0;
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, (isNext ? 7 : 3.5) * scale, 0, Math.PI * 2);
-    if (isNext) {
-      ctx.fillStyle = "#00E5FF";
-    } else if (isStart) {
-      ctx.fillStyle = "rgba(62, 207, 110, 0.8)";
-    } else {
-      ctx.fillStyle = "rgba(255,255,255,0.22)";
-    }
+    ctx.fillStyle = isNext ? "#00E5FF" : "rgba(255,255,255,0.22)";
     ctx.fill();
+  }
+
+  drawStartMarker();
+}
+
+/**
+ * Startpunktet tegnes stort og tydelig, med pulserende ring før
+ * runden begynner slik at det er lett å se hvor man skal starte.
+ */
+function drawStartMarker() {
+  const p = checkpointPosition(0);
+  const isNext = phase === "running" && nextCheckpoint === 0;
+  const waiting = phase === "waiting";
+
+  const green = "#3ecf6e";
+  const baseRadius = trackWidth * START_ZONE_FACTOR;
+
+  if (waiting) {
+    // Pulserende ring rundt startpunktet
+    const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 320);
+    const ringRadius = baseRadius + trackWidth * 0.45 * pulse;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, ringRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(62, 207, 110, ${0.65 * (1 - pulse) + 0.2})`;
+    ctx.lineWidth = 4 * scale;
+    ctx.stroke();
+  }
+
+  // Selve startsirkelen
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, baseRadius, 0, Math.PI * 2);
+  ctx.fillStyle = isNext ? "#00E5FF" : green;
+  ctx.fill();
+  ctx.lineWidth = 3 * scale;
+  ctx.strokeStyle = "#ffffff";
+  ctx.stroke();
+
+  // "START"-tekst ved siden av, kun før runden er i gang
+  if (waiting) {
+    ctx.save();
+    ctx.font = `bold ${Math.round(canvas.height * 0.038)}px 'Saira Condensed', sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillStyle = green;
+    ctx.fillText("START", p.x, p.y - trackWidth * 1.35);
+    ctx.restore();
   }
 }
 
