@@ -1,6 +1,8 @@
 :root {
-  --navy: #1b3a70;
-  --navy-dark: #0d1b33;
+  /* Marineblå hentet fra Ranheim-logoen */
+  --navy: #1F3378;
+  --navy-dark: #0D1730;
+  --navy-hover: #2A4494;
   --white: #ffffff;
   --accent-green: #3ecf6e;
   --accent-red: #e6493f;
@@ -201,7 +203,7 @@ h2 {
 }
 
 .group-btn:hover {
-  background: #16294f;
+  background: #16265C;
 }
 
 input {
@@ -302,7 +304,7 @@ input {
 }
 
 .icon-btn:hover {
-  background: #1f4382;
+  background: var(--navy-hover);
   border-color: var(--white);
 }
 
@@ -351,7 +353,7 @@ input {
 }
 
 .mode-card:hover {
-  background: #1f4382;
+  background: var(--navy-hover);
   border-color: var(--white);
   transform: translateY(-3px);
 }
@@ -447,7 +449,7 @@ input {
 
 .sidebar {
   width: clamp(380px, 27vw, 560px);
-  background: #10203e;
+  background: #131F4A;
   border-left: 2px solid var(--navy);
   padding: clamp(24px, 1.8vw, 36px);
   display: flex;
@@ -480,7 +482,7 @@ input {
 }
 
 .lb-tab:hover {
-  background: #1a3260;
+  background: var(--navy-hover);
   color: var(--white);
 }
 

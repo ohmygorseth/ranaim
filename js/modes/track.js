@@ -308,7 +308,7 @@ function draw(onTrack) {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#0d1b33";
+  ctx.fillStyle = "#0D1730";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawTrack(onTrack);
@@ -336,7 +336,7 @@ function drawTrack(onTrack) {
   ctx.stroke();
 
   // Selve korridoren
-  ctx.strokeStyle = "#16294f";
+  ctx.strokeStyle = "#16265C";
   ctx.lineWidth = trackWidth;
   ctx.stroke();
 
