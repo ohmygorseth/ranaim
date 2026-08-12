@@ -367,21 +367,25 @@ input {
 
 .meta-chip {
   display: flex;
-  align-items: baseline;
-  gap: 9px;
+  align-items: center;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 9px 16px;
+  line-height: 1;
 }
 
 .meta-label {
   font-family: 'Saira Condensed', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   font-size: clamp(11px, 0.8vw, 14px);
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: var(--grey-light);
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1;
+  padding-right: 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .meta-chip strong {
@@ -390,6 +394,7 @@ input {
   font-size: clamp(17px, 1.25vw, 23px);
   letter-spacing: 0.3px;
   color: var(--white);
+  line-height: 1;
 }
 
 .section-title {
