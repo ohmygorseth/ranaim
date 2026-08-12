@@ -360,8 +360,36 @@ input {
 }
 
 .hub-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.meta-chip {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+.meta-label {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600;
+  font-size: clamp(11px, 0.8vw, 14px);
+  letter-spacing: 1px;
+  text-transform: uppercase;
   color: var(--grey-light);
-  font-size: 14px;
+}
+
+.meta-chip strong {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(17px, 1.25vw, 23px);
+  letter-spacing: 0.3px;
+  color: var(--white);
 }
 
 .section-title {
