@@ -11,6 +11,7 @@ import { wasdMode } from "./modes/wasd.js";
 import { keyboardMouseMode } from "./modes/keyboardmouse.js";
 import { isMuted, toggleMute } from "./sound.js";
 import { reflex } from "./modes/reflex.js";
+import { moveReflex } from "./modes/movereflex.js";
 
 // --- Midlertidig deaktiverte moduser -------------------------
 // Tracking og Bane er tatt ut av appen fordi de ble lite spilt.
@@ -36,7 +37,7 @@ import {
 // ------------------------------------------------------------
 // Denne listen styrer BÅDE modus-kortene i hub-en og hvilke moduser
 // som kan velges i highscore-panelet (via PLAYABLE_MODES under).
-const MODES = [gridshot, reflex, wasdMode, keyboardMouseMode];
+const MODES = [gridshot, reflex, moveReflex, wasdMode, keyboardMouseMode];
 
 const PLAYABLE_MODES = MODES.filter((m) => !m.comingSoon);
 
@@ -149,6 +150,7 @@ const MODE_ICONS = {
   gridshot: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>`,
   tracking: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 16c4-9 8-9 12 0s6 4 8-2" stroke-linecap="round"/><circle cx="17" cy="9" r="3"/></svg>`,
   reflex: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z" stroke-linejoin="round"/></svg>`,
+  movereflex: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="15.5" cy="9" r="4"/><path d="M2 19c1.6-3.2 3.7-5.4 6.3-6.6" stroke-linecap="round" stroke-dasharray="3 3"/><path d="M19.5 5 22 2.5M19.5 13l2.5 2.5M11.5 5 9 2.5" stroke-linecap="round"/></svg>`,
   track: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 20c-2.2 0-4-1.6-4-3.6s1.8-3.6 4-3.6h9c1.7 0 3-1.1 3-2.6S16.7 7.6 15 7.6H8" stroke-linecap="round"/><circle cx="6" cy="7.6" r="2.2"/></svg>`,
   keyboardmouse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="13" height="11" rx="2"/><path d="M5 11h.01M8 11h.01M11 11h.01M5 14.5h5" stroke-linecap="round"/><rect x="17.5" y="5" width="5" height="9" rx="2.5"/><path d="M20 5v3" stroke-linecap="round"/></svg>`,
   wasd: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="9" y="10" width="6" height="6" rx="1"/><rect x="16" y="10" width="6" height="6" rx="1"/></svg>`
@@ -179,6 +181,7 @@ const MODE_DESCRIPTIONS = {
   gridshot: "Treff flest mulig mål",
   tracking: "Følg målet med siktet",
   reflex: "Rask reaksjon under tidspress",
+  movereflex: "Treff målet mens det beveger seg",
   track: "Følg banen uten å bomme",
   keyboardmouse: "Veksle mellom tast og museknapp",
   wasd: "Lær riktig håndgrep"
