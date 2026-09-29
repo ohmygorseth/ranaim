@@ -7,12 +7,21 @@
 
 import { GROUPS } from "./groups.js";
 import { gridshot } from "./modes/gridshot.js";
-import { tracking } from "./modes/tracking.js";
 import { wasdMode } from "./modes/wasd.js";
 import { keyboardMouseMode } from "./modes/keyboardmouse.js";
-import { trackMode } from "./modes/track.js";
 import { isMuted, toggleMute } from "./sound.js";
 import { reflex } from "./modes/reflex.js";
+
+// --- Midlertidig deaktiverte moduser -------------------------
+// Tracking og Bane er tatt ut av appen fordi de ble lite spilt.
+// Filene ligger fortsatt i js/modes/, og highscorene ligger urørt
+// i Firestore. Slik slår du en av dem på igjen:
+//   1. Fjern kommentartegnet foran importlinjen under
+//   2. Legg modulnavnet (tracking / trackMode) inn i MODES-listen
+// Ikoner og beskrivelser ligger allerede klare lenger ned i filen.
+// import { tracking } from "./modes/tracking.js";
+// import { trackMode } from "./modes/track.js";
+// -------------------------------------------------------------
 import {
   submitScore,
   getWeeklyLeaderboard,
@@ -25,7 +34,9 @@ import {
 // Moduler tilgjengelig i hub-en. Legg til nye her når de er klare
 // (sett comingSoon: false når modulen er ferdig implementert).
 // ------------------------------------------------------------
-const MODES = [gridshot, reflex, tracking, trackMode, wasdMode, keyboardMouseMode];
+// Denne listen styrer BÅDE modus-kortene i hub-en og hvilke moduser
+// som kan velges i highscore-panelet (via PLAYABLE_MODES under).
+const MODES = [gridshot, reflex, wasdMode, keyboardMouseMode];
 
 const PLAYABLE_MODES = MODES.filter((m) => !m.comingSoon);
 
