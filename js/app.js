@@ -67,9 +67,12 @@ const screens = {
   privacy: document.getElementById("screen-privacy")
 };
 
+let currentScreen = null;
+
 function showScreen(name) {
   Object.values(screens).forEach((el) => el.classList.add("hidden"));
   screens[name].classList.remove("hidden");
+  currentScreen = name;
 }
 
 // ------------------------------------------------------------
@@ -540,6 +543,58 @@ function setupTouchBlocking() {
 }
 
 // ------------------------------------------------------------
+// Tilbake-knapp (nettleser og mus)
+// ------------------------------------------------------------
+// RanAim er én enkelt side der JavaScript bytter mellom "skjermer".
+// Uten dette ville et trykk på tilbake - i nettleseren eller på
+// sidknappen på musa - sendt spilleren rett ut av ranaim.no, i verste
+// fall midt i en runde.
+//
+// Trikset er å alltid holde en ekstra oppføring i nettleserhistorikken.
+// Når tilbake trykkes, fanger vi det opp, navigerer inne i appen selv,
+// og legger straks inn en ny oppføring så historikken aldri går tom.
+//
+// Merk: ingen nettside kan blokkere tilbake fullstendig - holder man
+// inne knappen og velger en eldre side, kommer man seg ut. Dette
+// dekker vanlige enkelttrykk, som er det som skjer ved uhell.
+// ------------------------------------------------------------
+function setupBackButtonGuard() {
+  const pushGuard = () => history.pushState({ ranaim: true }, "");
+
+  pushGuard();
+
+  window.addEventListener("popstate", () => {
+    // Legg inn en ny buffer med én gang, ellers tømmes historikken
+    pushGuard();
+
+    switch (currentScreen) {
+      case "nickname":
+      case "privacy":
+        showScreen("groupSelect");
+        break;
+
+      case "hub":
+        state.group = null;
+        state.nickname = null;
+        showScreen("groupSelect");
+        break;
+
+      case "result":
+        enterHub();
+        break;
+
+      case "game":
+        // Ikke avbryt en pågående runde - bruk Escape for det
+        break;
+
+      default:
+        // Gruppevalg: bli stående
+        break;
+    }
+  });
+}
+
+// ------------------------------------------------------------
 // Init
 // ------------------------------------------------------------
 document.getElementById("open-privacy-btn").addEventListener("click", () => {
@@ -552,5 +607,6 @@ document.getElementById("close-privacy-btn").addEventListener("click", () => {
 
 setupTouchBlocking();
 setupMuteButton();
+setupBackButtonGuard();
 renderGroupSelect();
 showScreen("groupSelect");
