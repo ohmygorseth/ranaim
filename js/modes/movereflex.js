@@ -29,8 +29,8 @@ const GRID_COLS = 6;
 const GRID_ROWS = 4;
 const BASE_TARGET_RADIUS = 50;
 
-const BASE_TARGET_SPEED = 170; // piksler per sekund (ved full skjermstørrelse)
-const TURN_RATE = 2.6; // hvor raskt retningen kan dreie (radianer per sekund)
+const BASE_TARGET_SPEED = 195; // piksler per sekund (ved full skjermstørrelse)
+const TURN_RATE = 1.5; // hvor raskt retningen kan dreie (radianer per sekund)
 const EDGE_MARGIN = 20; // hvor nær kanten målet får komme
 
 let ctx = null;
@@ -65,6 +65,7 @@ export const moveReflex = {
   id: "movereflex",
   displayName: "Jakt",
   comingSoon: false,
+  isNew: true, // gir "NY"-merke på modus-kortet - fjern denne når den ikke er ny lenger
 
   start(canvasEl, context, onComplete) {
     canvas = canvasEl;

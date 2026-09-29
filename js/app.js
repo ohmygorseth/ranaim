@@ -166,6 +166,7 @@ function renderHub() {
     const card = document.createElement("button");
     card.className = "mode-card" + (mode.comingSoon ? " mode-card-disabled" : "");
     card.innerHTML = `
+      ${mode.isNew && !mode.comingSoon ? `<span class="mode-card-badge">NY</span>` : ""}
       <div class="mode-card-icon">${MODE_ICONS[mode.id] || ""}</div>
       <div class="mode-card-title">${mode.displayName}</div>
       <div class="mode-card-sub">${mode.comingSoon ? "Kommer snart" : MODE_DESCRIPTIONS[mode.id] || ""}</div>

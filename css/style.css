@@ -408,6 +408,7 @@ input {
 }
 
 .mode-card {
+  position: relative;
   background: var(--navy);
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-radius: 12px;
@@ -417,6 +418,21 @@ input {
   font-family: inherit;
   color: var(--white);
   transition: transform 0.12s, background 0.15s, border-color 0.15s;
+}
+
+.mode-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--accent-green);
+  color: var(--navy-dark);
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  line-height: 1;
 }
 
 .mode-card:hover {
