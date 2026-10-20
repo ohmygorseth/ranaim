@@ -228,7 +228,7 @@ function draw() {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#0d1b33";
+  ctx.fillStyle = "#0D1730";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawGame();
@@ -300,15 +300,15 @@ function drawKeyboard() {
       if (awaitingRelease && isHeld) {
         // Taster som fortsatt holdes fra forrige utfordring - nøytral farge,
         // ikke rødt, siden det ikke er en feil
-        ctx.fillStyle = "#2b4a86";
+        ctx.fillStyle = "#3A55A8";
       } else if (isHeld && isTarget) {
         ctx.fillStyle = "#3ecf6e";
       } else if (isHeld) {
         ctx.fillStyle = "#e6493f";
       } else if (isTarget) {
-        ctx.fillStyle = "#1b3a70";
+        ctx.fillStyle = "#1F3378";
       } else {
-        ctx.fillStyle = "#16294f";
+        ctx.fillStyle = "#16265C";
       }
       ctx.fill();
 
@@ -317,7 +317,7 @@ function drawKeyboard() {
       ctx.stroke();
 
       // Tastebokstav
-      ctx.fillStyle = isHeld && !awaitingRelease ? "#0d1b33" : "#ffffff";
+      ctx.fillStyle = isHeld && !awaitingRelease ? "#0D1730" : "#ffffff";
       ctx.font = `bold ${Math.round(keyW * 0.3)}px 'Saira Condensed', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";

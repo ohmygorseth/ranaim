@@ -329,7 +329,7 @@ function draw(isOnTarget) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Bakgrunn
-  ctx.fillStyle = "#0d1b33";
+  ctx.fillStyle = "#0D1730";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Mål - grønn kant når crosshair er på målet, hvit ellers
@@ -339,7 +339,7 @@ function draw(isOnTarget) {
     ctx.fillStyle = "#ffffff";
     ctx.fill();
     ctx.lineWidth = 4 * scale;
-    ctx.strokeStyle = isOnTarget ? "#3ecf6e" : "#1b3a70";
+    ctx.strokeStyle = isOnTarget ? "#3ecf6e" : "#1F3378";
     ctx.stroke();
 
     drawTurnArrow();

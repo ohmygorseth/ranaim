@@ -252,7 +252,7 @@ function draw() {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#0d1b33";
+  ctx.fillStyle = "#0D1730";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // HUD
@@ -311,13 +311,13 @@ function drawKeyboardAndMouse() {
       roundedRect(x, rowY, width, keyH, 8);
 
       if (key.filler) {
-        ctx.fillStyle = "#101f3b";
+        ctx.fillStyle = "#101B44";
       } else if (isFlashing) {
         ctx.fillStyle = "#e6493f";
       } else if (isTarget) {
         ctx.fillStyle = "#3ecf6e";
       } else {
-        ctx.fillStyle = "#16294f";
+        ctx.fillStyle = "#16265C";
       }
       ctx.fill();
 
@@ -329,7 +329,7 @@ function drawKeyboardAndMouse() {
       ctx.fillStyle = key.filler
         ? "rgba(255,255,255,0.28)"
         : isTarget || isFlashing
-        ? "#0d1b33"
+        ? "#0D1730"
         : "#ffffff";
       ctx.font = `bold ${Math.round(keyUnit * 0.3)}px 'Saira Condensed', sans-serif`;
       ctx.textAlign = "center";
@@ -366,7 +366,7 @@ function drawMouse(x, y, w, h) {
   ctx.arcTo(x, y + h, x, y, r * 1.3);
   ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
-  ctx.fillStyle = "#16294f";
+  ctx.fillStyle = "#16265C";
   ctx.fill();
   ctx.lineWidth = 2;
   ctx.strokeStyle = "#ffffff";
@@ -382,7 +382,7 @@ function drawMouse(x, y, w, h) {
   ctx.lineTo(x, y + r);
   ctx.arcTo(x, y, x + r, y, r);
   ctx.closePath();
-  ctx.fillStyle = leftFlash ? "#e6493f" : leftTarget ? "#3ecf6e" : "#1f3a6d";
+  ctx.fillStyle = leftFlash ? "#e6493f" : leftTarget ? "#3ecf6e" : "#263E86";
   ctx.fill();
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;
@@ -398,7 +398,7 @@ function drawMouse(x, y, w, h) {
   ctx.lineTo(x + w, y + buttonH);
   ctx.lineTo(x + w / 2, y + buttonH);
   ctx.closePath();
-  ctx.fillStyle = rightFlash ? "#e6493f" : rightTarget ? "#3ecf6e" : "#1f3a6d";
+  ctx.fillStyle = rightFlash ? "#e6493f" : rightTarget ? "#3ecf6e" : "#263E86";
   ctx.fill();
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;

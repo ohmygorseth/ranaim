@@ -7,12 +7,23 @@
 
 import { GROUPS } from "./groups.js";
 import { gridshot } from "./modes/gridshot.js";
-import { tracking } from "./modes/tracking.js";
 import { wasdMode } from "./modes/wasd.js";
 import { keyboardMouseMode } from "./modes/keyboardmouse.js";
-import { trackMode } from "./modes/track.js";
 import { isMuted, toggleMute } from "./sound.js";
 import { reflex } from "./modes/reflex.js";
+import { moveReflex } from "./modes/movereflex.js";
+import { rytmeMode } from "./modes/rytme.js";
+
+// --- Midlertidig deaktiverte moduser -------------------------
+// Tracking og Bane er tatt ut av appen fordi de ble lite spilt.
+// Filene ligger fortsatt i js/modes/, og highscorene ligger urørt
+// i Firestore. Slik slår du en av dem på igjen:
+//   1. Fjern kommentartegnet foran importlinjen under
+//   2. Legg modulnavnet (tracking / trackMode) inn i MODES-listen
+// Ikoner og beskrivelser ligger allerede klare lenger ned i filen.
+// import { tracking } from "./modes/tracking.js";
+// import { trackMode } from "./modes/track.js";
+// -------------------------------------------------------------
 import {
   submitScore,
   getWeeklyLeaderboard,
@@ -25,7 +36,9 @@ import {
 // Moduler tilgjengelig i hub-en. Legg til nye her når de er klare
 // (sett comingSoon: false når modulen er ferdig implementert).
 // ------------------------------------------------------------
-const MODES = [gridshot, reflex, tracking, trackMode, wasdMode, keyboardMouseMode];
+// Denne listen styrer BÅDE modus-kortene i hub-en og hvilke moduser
+// som kan velges i highscore-panelet (via PLAYABLE_MODES under).
+const MODES = [gridshot, reflex, moveReflex, wasdMode, keyboardMouseMode, rytmeMode];
 
 const PLAYABLE_MODES = MODES.filter((m) => !m.comingSoon);
 
@@ -55,9 +68,12 @@ const screens = {
   privacy: document.getElementById("screen-privacy")
 };
 
+let currentScreen = null;
+
 function showScreen(name) {
   Object.values(screens).forEach((el) => el.classList.add("hidden"));
   screens[name].classList.remove("hidden");
+  currentScreen = name;
 }
 
 // ------------------------------------------------------------
@@ -138,9 +154,11 @@ const MODE_ICONS = {
   gridshot: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>`,
   tracking: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 16c4-9 8-9 12 0s6 4 8-2" stroke-linecap="round"/><circle cx="17" cy="9" r="3"/></svg>`,
   reflex: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z" stroke-linejoin="round"/></svg>`,
+  movereflex: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="15.5" cy="9" r="4"/><path d="M2 19c1.6-3.2 3.7-5.4 6.3-6.6" stroke-linecap="round" stroke-dasharray="3 3"/><path d="M19.5 5 22 2.5M19.5 13l2.5 2.5M11.5 5 9 2.5" stroke-linecap="round"/></svg>`,
   track: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 20c-2.2 0-4-1.6-4-3.6s1.8-3.6 4-3.6h9c1.7 0 3-1.1 3-2.6S16.7 7.6 15 7.6H8" stroke-linecap="round"/><circle cx="6" cy="7.6" r="2.2"/></svg>`,
   keyboardmouse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="13" height="11" rx="2"/><path d="M5 11h.01M8 11h.01M11 11h.01M5 14.5h5" stroke-linecap="round"/><rect x="17.5" y="5" width="5" height="9" rx="2.5"/><path d="M20 5v3" stroke-linecap="round"/></svg>`,
-  wasd: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="9" y="10" width="6" height="6" rx="1"/><rect x="16" y="10" width="6" height="6" rx="1"/></svg>`
+  wasd: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="9" y="10" width="6" height="6" rx="1"/><rect x="16" y="10" width="6" height="6" rx="1"/></svg>`,
+  rytme: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 19h18" stroke-linecap="round"/><rect x="3" y="3.5" width="5" height="3.2" rx="1.2" fill="currentColor" stroke="none"/><rect x="9.5" y="9" width="5" height="3.2" rx="1.2" fill="currentColor" stroke="none"/><rect x="16" y="5.5" width="5" height="3.2" rx="1.2" fill="currentColor" stroke="none"/><rect x="9.5" y="14.5" width="5" height="3.2" rx="1.2" fill="currentColor" stroke="none" opacity="0.55"/></svg>`
 };
 
 function renderHub() {
@@ -153,6 +171,7 @@ function renderHub() {
     const card = document.createElement("button");
     card.className = "mode-card" + (mode.comingSoon ? " mode-card-disabled" : "");
     card.innerHTML = `
+      ${mode.isNew && !mode.comingSoon ? `<span class="mode-card-badge">NY</span>` : ""}
       <div class="mode-card-icon">${MODE_ICONS[mode.id] || ""}</div>
       <div class="mode-card-title">${mode.displayName}</div>
       <div class="mode-card-sub">${mode.comingSoon ? "Kommer snart" : MODE_DESCRIPTIONS[mode.id] || ""}</div>
@@ -168,9 +187,11 @@ const MODE_DESCRIPTIONS = {
   gridshot: "Treff flest mulig mål",
   tracking: "Følg målet med siktet",
   reflex: "Rask reaksjon under tidspress",
+  movereflex: "Treff målet mens det beveger seg",
   track: "Følg banen uten å bomme",
   keyboardmouse: "Veksle mellom tast og museknapp",
-  wasd: "Lær riktig håndgrep"
+  wasd: "Lær riktig håndgrep",
+  rytme: "Treff tastene i takt"
 };
 
 function enterHub() {
@@ -525,6 +546,58 @@ function setupTouchBlocking() {
 }
 
 // ------------------------------------------------------------
+// Tilbake-knapp (nettleser og mus)
+// ------------------------------------------------------------
+// RanAim er én enkelt side der JavaScript bytter mellom "skjermer".
+// Uten dette ville et trykk på tilbake - i nettleseren eller på
+// sidknappen på musa - sendt spilleren rett ut av ranaim.no, i verste
+// fall midt i en runde.
+//
+// Trikset er å alltid holde en ekstra oppføring i nettleserhistorikken.
+// Når tilbake trykkes, fanger vi det opp, navigerer inne i appen selv,
+// og legger straks inn en ny oppføring så historikken aldri går tom.
+//
+// Merk: ingen nettside kan blokkere tilbake fullstendig - holder man
+// inne knappen og velger en eldre side, kommer man seg ut. Dette
+// dekker vanlige enkelttrykk, som er det som skjer ved uhell.
+// ------------------------------------------------------------
+function setupBackButtonGuard() {
+  const pushGuard = () => history.pushState({ ranaim: true }, "");
+
+  pushGuard();
+
+  window.addEventListener("popstate", () => {
+    // Legg inn en ny buffer med én gang, ellers tømmes historikken
+    pushGuard();
+
+    switch (currentScreen) {
+      case "nickname":
+      case "privacy":
+        showScreen("groupSelect");
+        break;
+
+      case "hub":
+        state.group = null;
+        state.nickname = null;
+        showScreen("groupSelect");
+        break;
+
+      case "result":
+        enterHub();
+        break;
+
+      case "game":
+        // Ikke avbryt en pågående runde - bruk Escape for det
+        break;
+
+      default:
+        // Gruppevalg: bli stående
+        break;
+    }
+  });
+}
+
+// ------------------------------------------------------------
 // Init
 // ------------------------------------------------------------
 document.getElementById("open-privacy-btn").addEventListener("click", () => {
@@ -537,5 +610,6 @@ document.getElementById("close-privacy-btn").addEventListener("click", () => {
 
 setupTouchBlocking();
 setupMuteButton();
+setupBackButtonGuard();
 renderGroupSelect();
 showScreen("groupSelect");

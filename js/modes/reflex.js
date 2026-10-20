@@ -185,7 +185,7 @@ function draw(now) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Bakgrunn
-  ctx.fillStyle = "#0d1b33";
+  ctx.fillStyle = "#0D1730";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Mål med krympende ring som viser gjenværende tid
@@ -197,7 +197,7 @@ function draw(now) {
     ctx.fillStyle = "#ffffff";
     ctx.fill();
     ctx.lineWidth = 4 * scale;
-    ctx.strokeStyle = "#1b3a70";
+    ctx.strokeStyle = "#1F3378";
     ctx.stroke();
 
     // Krympende tidsring rundt målet

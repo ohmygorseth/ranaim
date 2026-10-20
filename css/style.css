@@ -1,6 +1,8 @@
 :root {
-  --navy: #1b3a70;
-  --navy-dark: #0d1b33;
+  /* Marineblå hentet fra Ranheim-logoen */
+  --navy: #1F3378;
+  --navy-dark: #0D1730;
+  --navy-hover: #2A4494;
   --white: #ffffff;
   --accent-green: #3ecf6e;
   --accent-red: #e6493f;
@@ -140,10 +142,21 @@ h1 {
   text-transform: uppercase;
 }
 
+.brand-tagline {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: clamp(19px, 1.6vw, 30px);
+  color: var(--white);
+  margin: 0 0 6px;
+}
+
 .brand-subtitle {
   color: var(--grey-light);
   font-size: clamp(15px, 1.15vw, 22px);
-  margin: 0 0 20px;
+  margin: 0 0 34px;
 }
 
 h2 {
@@ -155,6 +168,17 @@ h2 {
   color: var(--grey-light);
   font-size: clamp(16px, 1.1vw, 20px);
   margin-bottom: 24px;
+}
+
+#screen-group-select .subtitle {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(20px, 1.6vw, 28px);
+  letter-spacing: 0.5px;
+  color: var(--white);
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  margin-bottom: 18px;
 }
 
 .nickname-group {
@@ -190,7 +214,7 @@ h2 {
 }
 
 .group-btn:hover {
-  background: #16294f;
+  background: #16265C;
 }
 
 input {
@@ -267,13 +291,36 @@ input {
 .hub-header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+}
+
+#change-group-btn {
+  background: var(--navy);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  color: var(--white);
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(16px, 1.15vw, 21px);
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  height: 52px;
+  padding: 0 22px;
+  margin-top: 0;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#change-group-btn:hover {
+  background: var(--navy-hover);
+  border-color: var(--white);
+  color: var(--white);
 }
 
 .icon-btn {
-  width: 42px;
-  height: 42px;
-  padding: 8px;
+  width: 52px;
+  height: 52px;
+  padding: 12px;
   background: var(--navy);
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-radius: 8px;
@@ -291,7 +338,7 @@ input {
 }
 
 .icon-btn:hover {
-  background: #1f4382;
+  background: var(--navy-hover);
   border-color: var(--white);
 }
 
@@ -313,8 +360,41 @@ input {
 }
 
 .hub-meta {
-  color: var(--grey-light);
-  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.meta-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 9px 16px;
+  line-height: 1;
+}
+
+.meta-label {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(11px, 0.8vw, 14px);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1;
+  padding-right: 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.meta-chip strong {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(17px, 1.25vw, 23px);
+  letter-spacing: 0.3px;
+  color: var(--white);
+  line-height: 1;
 }
 
 .section-title {
@@ -328,6 +408,7 @@ input {
 }
 
 .mode-card {
+  position: relative;
   background: var(--navy);
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-radius: 12px;
@@ -339,8 +420,72 @@ input {
   transition: transform 0.12s, background 0.15s, border-color 0.15s;
 }
 
+.mode-card-badge {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  background: linear-gradient(135deg, #5BE88B 0%, #23B45C 100%);
+  color: #06210F;
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 1.4px;
+  padding: 5px 13px 5px 11px;
+  border-radius: 4px;
+  line-height: 1;
+  transform: skewX(-10deg);
+  overflow: hidden;
+  box-shadow: 0 0 0 0 rgba(62, 207, 110, 0.55);
+  animation: badge-pulse 2.4s ease-out infinite;
+}
+
+/* Liten glans som sveiper over merket */
+.mode-card-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.65) 48%,
+    transparent 62%
+  );
+  animation: badge-shine 3.6s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(62, 207, 110, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 9px rgba(62, 207, 110, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(62, 207, 110, 0);
+  }
+}
+
+@keyframes badge-shine {
+  0%, 62% {
+    transform: translateX(-120%);
+  }
+  85%, 100% {
+    transform: translateX(120%);
+  }
+}
+
+/* Respekter systeminnstilling for redusert bevegelse */
+@media (prefers-reduced-motion: reduce) {
+  .mode-card-badge,
+  .mode-card-badge::after {
+    animation: none;
+  }
+}
+
 .mode-card:hover {
-  background: #1f4382;
+  background: var(--navy-hover);
   border-color: var(--white);
   transform: translateY(-3px);
 }
@@ -436,7 +581,7 @@ input {
 
 .sidebar {
   width: clamp(380px, 27vw, 560px);
-  background: #10203e;
+  background: #131F4A;
   border-left: 2px solid var(--navy);
   padding: clamp(24px, 1.8vw, 36px);
   display: flex;
@@ -469,7 +614,7 @@ input {
 }
 
 .lb-tab:hover {
-  background: #1a3260;
+  background: var(--navy-hover);
   color: var(--white);
 }
 
