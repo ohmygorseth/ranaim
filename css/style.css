@@ -44,14 +44,14 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 24px;
+  gap: 16px;
   width: min(46vw, 900px);
   min-width: 480px;
 }
 
 .panel-center {
   background: var(--navy);
-  padding: clamp(40px, 4vw, 64px) clamp(40px, 5vw, 80px);
+  padding: clamp(24px, 2.4vw, 40px) clamp(32px, 4vw, 64px);
   border-radius: 12px;
   border: 2px solid var(--white);
   text-align: center;
@@ -198,7 +198,37 @@ h2 {
 .group-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+}
+
+.group-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-section-separate {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.day-heading {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: clamp(15px, 1.1vw, 20px);
+  color: rgba(255, 255, 255, 0.7);
+  text-align: left;
+  margin: 0 0 2px 2px;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
 }
 
 .group-btn {
@@ -206,8 +236,8 @@ h2 {
   color: var(--white);
   border: 2px solid var(--white);
   border-radius: 8px;
-  padding: clamp(14px, 1.3vw, 22px) 18px;
-  font-size: clamp(16px, 1.15vw, 22px);
+  padding: clamp(10px, 0.95vw, 15px) 14px;
+  font-size: clamp(16px, 1.15vw, 21px);
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s;
@@ -839,4 +869,14 @@ input {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+
+/* Lave skjermer (f.eks. et ikke-maksimert vindu): gjør logoen mindre
+   slik at alle gruppene får plass uten scrolling. */
+@media (max-height: 900px) {
+  .logo-top {
+    width: 72%;
+    margin: 0 auto;
+  }
 }

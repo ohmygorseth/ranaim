@@ -10,6 +10,7 @@ import { gridshot } from "./modes/gridshot.js";
 import { wasdMode } from "./modes/wasd.js";
 import { keyboardMouseMode } from "./modes/keyboardmouse.js";
 import { isMuted, toggleMute } from "./sound.js";
+import { validateNickname } from "./nicknamefilter.js";
 import { reflex } from "./modes/reflex.js";
 import { moveReflex } from "./modes/movereflex.js";
 import { rytmeMode } from "./modes/rytme.js";
@@ -79,28 +80,54 @@ function showScreen(name) {
 // ------------------------------------------------------------
 // 1. Gruppevalg
 // ------------------------------------------------------------
+// Rekkefølgen dagene vises i på gruppevalget. "Teknisk" står alltid nederst.
+const DAY_ORDER = ["Søndag", "Torsdag", "Fredag", "Teknisk"];
+
 function renderGroupSelect() {
   const container = document.getElementById("group-list");
   container.innerHTML = "";
-  GROUPS.forEach((group) => {
-    const btn = document.createElement("button");
-    btn.className = "group-btn";
-    btn.textContent = group.name;
-    btn.addEventListener("click", () => {
-      state.group = group;
 
-      if (!REQUIRE_GROUP_PASSWORD) {
-        goToNicknameScreen();
-        return;
-      }
+  DAY_ORDER.forEach((day) => {
+    const groupsForDay = GROUPS.filter((g) => g.day === day);
+    if (groupsForDay.length === 0) return;
 
-      showScreen("password");
-      document.getElementById("password-error").classList.add("hidden");
-      document.getElementById("password-input").value = "";
-      document.getElementById("password-group-name").textContent = group.name;
-      document.getElementById("password-input").focus();
+    const section = document.createElement("div");
+    section.className = "group-section" + (day === "Teknisk" ? " group-section-separate" : "");
+
+    // Teknisk har ingen dagsoverskrift - den står adskilt nederst
+    if (day !== "Teknisk") {
+      const heading = document.createElement("h3");
+      heading.className = "day-heading";
+      heading.textContent = day;
+      section.appendChild(heading);
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "group-grid";
+
+    groupsForDay.forEach((group) => {
+      const btn = document.createElement("button");
+      btn.className = "group-btn";
+      btn.textContent = group.label || group.name;
+      btn.addEventListener("click", () => {
+        state.group = group;
+
+        if (!REQUIRE_GROUP_PASSWORD) {
+          goToNicknameScreen();
+          return;
+        }
+
+        showScreen("password");
+        document.getElementById("password-error").classList.add("hidden");
+        document.getElementById("password-input").value = "";
+        document.getElementById("password-group-name").textContent = group.name;
+        document.getElementById("password-input").focus();
+      });
+      grid.appendChild(btn);
     });
-    container.appendChild(btn);
+
+    section.appendChild(grid);
+    container.appendChild(section);
   });
 }
 
@@ -136,9 +163,23 @@ document.getElementById("back-to-groups").addEventListener("click", () => {
 document.getElementById("nickname-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const val = document.getElementById("nickname-input").value.trim().replace(/\s+/g, " ");
-  if (val.length < 2) return;
+  const errorEl = document.getElementById("nickname-error");
+
+  const check = validateNickname(val);
+  if (!check.ok) {
+    errorEl.textContent = check.reason;
+    errorEl.classList.remove("hidden");
+    return;
+  }
+
+  errorEl.classList.add("hidden");
   state.nickname = val;
   enterHub();
+});
+
+// Skjul feilmeldingen så snart spilleren begynner å rette på navnet
+document.getElementById("nickname-input").addEventListener("input", () => {
+  document.getElementById("nickname-error").classList.add("hidden");
 });
 
 // ------------------------------------------------------------
