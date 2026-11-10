@@ -22,10 +22,14 @@
 import { getScale } from "../scale.js";
 import { playSound } from "../sound.js";
 
-const ROUND_SECONDS = 30;
+const RAMP_END_MS = 30000; // tempoet øker jevnt fram til dette tidspunktet
+const MAX_MISSES = 3; // runden slutter når dette antallet bom er gjort
+const RAMP_AFTER_MS = 10000; // etter RAMP_END_MS: så mange ms per tempoøkning
+const RAMP_STEP_BPM = 4; // ...og så mye øker tempoet hver gang
+const MAX_BPM = 150; // tempoet stopper her
 
 const START_BPM = 64; // noter per minutt ved start
-const END_BPM = 108; // ved slutten av runden
+const END_BPM = 108; // tempo når RAMP_END_MS er nådd
 const FALL_SECONDS = 1.95; // hvor lenge en note er synlig før trefflinjen
 const HIT_WINDOW_MS = 300; // hvor nær i tid trykket må være (romslig for de yngste)
 
@@ -48,7 +52,6 @@ let onCompleteCallback = null;
 
 let scale = 1;
 let running = false;
-let timeLeft = ROUND_SECONDS;
 
 let startTime = 0;
 let notes = []; // { lane, hitTime, state: "pending" | "hit" | "missed" }
@@ -63,7 +66,6 @@ let points = 0;
 let laneFlash = []; // tidspunkt for siste visuelle blink per bane
 let laneFlashType = []; // "hit" | "miss"
 
-let timerInterval = null;
 let animationFrameId = null;
 let keydownHandler = null;
 
@@ -81,7 +83,6 @@ export const rytmeMode = {
     scale = getScale(canvas);
 
     running = true;
-    timeLeft = ROUND_SECONDS;
     notes = [];
     hits = 0;
     misses = 0;
@@ -98,13 +99,6 @@ export const rytmeMode = {
     keydownHandler = (e) => handleKeydown(e);
     window.addEventListener("keydown", keydownHandler);
 
-    timerInterval = setInterval(() => {
-      timeLeft -= 1;
-      if (timeLeft <= 0) {
-        endRound();
-      }
-    }, 1000);
-
     animationFrameId = requestAnimationFrame(loop);
   },
 
@@ -115,15 +109,14 @@ export const rytmeMode = {
 
 function cleanup() {
   running = false;
-  if (timerInterval) clearInterval(timerInterval);
   if (animationFrameId) cancelAnimationFrame(animationFrameId);
   if (keydownHandler) window.removeEventListener("keydown", keydownHandler);
-  timerInterval = null;
   animationFrameId = null;
   keydownHandler = null;
 }
 
-function endRound() {
+function finishRound() {
+  if (!running) return; // allerede avsluttet
   cleanup();
 
   const total = hits + misses;
@@ -146,10 +139,21 @@ function endRound() {
 // Notegenerering
 // ------------------------------------------------------------
 
-/** Millisekunder mellom notene, synker gradvis gjennom runden. */
+/**
+ * Millisekunder mellom to noter.
+ * 0-30 s: tempoet stiger jevnt fra START_BPM til END_BPM.
+ * Etter 30 s: tempoet går opp RAMP_STEP_BPM per RAMP_AFTER_MS, til MAX_BPM.
+ */
 function currentInterval(elapsedMs) {
-  const progress = Math.min(elapsedMs / (ROUND_SECONDS * 1000), 1);
-  const bpm = START_BPM + (END_BPM - START_BPM) * progress;
+  let bpm;
+  if (elapsedMs <= RAMP_END_MS) {
+    const progress = elapsedMs / RAMP_END_MS;
+    bpm = START_BPM + (END_BPM - START_BPM) * progress;
+  } else {
+    const steps = Math.floor((elapsedMs - RAMP_END_MS) / RAMP_AFTER_MS);
+    bpm = END_BPM + steps * RAMP_STEP_BPM;
+  }
+  bpm = Math.min(bpm, MAX_BPM);
   return 60000 / bpm;
 }
 
@@ -182,13 +186,15 @@ function loop(now) {
   const elapsed = now - startTime;
   spawnNotesIfNeeded(elapsed);
 
-  // Noter som har passert treffvinduet uten å bli truffet
+  // Noter som har passert treffvinduet uten å bli truffet teller som bom
   notes.forEach((note) => {
     if (note.state === "pending" && elapsed > note.hitTime + HIT_WINDOW_MS) {
       note.state = "missed";
       registerMiss(note.lane);
     }
   });
+
+  if (!running) return; // runden kan være avsluttet av det siste bommet
 
   // Rydd bort noter som er ute av bildet
   notes = notes.filter((n) => elapsed < n.hitTime + 600);
@@ -237,6 +243,9 @@ function registerMiss(laneIndex) {
   combo = 0;
   flashLane(laneIndex, "miss");
   playSound("miss");
+  if (misses >= MAX_MISSES) {
+    finishRound();
+  }
 }
 
 function multiplier() {
@@ -393,7 +402,7 @@ function drawHud() {
   ctx.textAlign = "left";
   const hudX = canvas.width * 0.02;
   const hudLine = canvas.height * 0.05;
-  ctx.fillText(`Tid: ${timeLeft}s`, hudX, hudLine);
+  ctx.fillText(`Bom: ${misses} / ${MAX_MISSES}`, hudX, hudLine);
   ctx.fillText(`Poeng: ${Math.round(points)}`, hudX, hudLine * 1.9);
   ctx.fillText(`Treff: ${hits}`, hudX, hudLine * 2.8);
 
